@@ -1,0 +1,15 @@
+# Windows Systemdateien
+Thumbs.db
+Desktop.ini
+
+# OS X Systemdateien
+.DS_Store
+
+# Editor / IDE Einstellungen
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
