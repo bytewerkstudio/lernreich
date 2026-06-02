@@ -919,6 +919,25 @@ class StudyCityApp:
         )
         settings_btn.pack(fill="x", pady=(20, 0))
 
+        # Theme Toggle button in sidebar
+        self.theme_toggle_btn = tk.Button(
+            self.nav_frame,
+            text="☀️  Hell-Modus" if self.theme_mode.get() == "dark" else "🌙  Dunkel-Modus",
+            font=("Segoe UI", 10),
+            anchor="w",
+            padx=16,
+            pady=10,
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            bg=COLORS["paper_dark"],
+            fg=COLORS["muted"],
+            activebackground="#eef0fe",
+            activeforeground="#3b52e2",
+            command=self.toggle_theme
+        )
+        self.theme_toggle_btn.pack(fill="x", pady=3)
+
         # Bottom XP Progress Area
         self.xp_sidebar_frame = tk.Frame(parent, bg=COLORS["paper_dark"])
         self.xp_sidebar_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=24)
@@ -1014,6 +1033,7 @@ class StudyCityApp:
         main_menu.add_command(label="📝  Lernjournal", command=lambda: self.switch_view("notes"))
         main_menu.add_separator()
         main_menu.add_command(label="⚙️  Einstellungen", command=self.open_settings)
+        main_menu.add_command(label="🌓  Farbschema wechseln", command=self.toggle_theme)
         main_menu.add_command(label="📤  Sessions als CSV exportieren", command=self.export_sessions_csv)
         main_menu.add_separator()
         main_menu.add_command(label="❌  Beenden", command=self._quit_from_tray)
@@ -4696,8 +4716,22 @@ class StudyCityApp:
         # Recursively update standard Tkinter widgets
         self._update_widget_colors(self.root)
         
+        # Update sidebar theme toggle button text if exists
+        if hasattr(self, "theme_toggle_btn") and self.theme_toggle_btn.winfo_exists():
+            self.theme_toggle_btn.configure(
+                text="☀️  Hell-Modus" if mode == "dark" else "🌙  Dunkel-Modus"
+            )
+        
         # Re-draw canvasses and active panes
         self._render_all()
+
+    def toggle_theme(self) -> None:
+        current = self.theme_mode.get()
+        new_mode = "light" if current == "dark" else "dark"
+        self.theme_mode.set(new_mode)
+        self.data["theme_mode"] = new_mode
+        self._apply_theme()
+        self._save_current_session()
 
     def _update_widget_colors(self, widget) -> None:
         # Safety check: bypass updating colors for toast notifications or their children
