@@ -936,7 +936,7 @@ class StudyCityApp:
         # Version label directly under the XP Progress Area, right-aligned
         self.sidebar_version_lbl = tk.Label(
             self.xp_sidebar_frame,
-            text="Version 1.2",
+            text=f"Version {APP_VERSION}",
             font=("Segoe UI", 7),
             fg=COLORS["muted"],
             bg=COLORS["paper_dark"]
