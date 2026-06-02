@@ -1172,9 +1172,9 @@ class StudyCityApp:
             showvalue=False,
             variable=self.target_minutes,
             command=self._on_duration_slider_changed,
-            bg="#ffffff",
+            bg=COLORS["line"],
             troughcolor=COLORS["gold"],
-            activebackground="#ffffff",
+            activebackground=COLORS["muted"],
             highlightthickness=0,
             bd=0,
             width=8,
@@ -1219,9 +1219,9 @@ class StudyCityApp:
             showvalue=False,
             variable=self.reminder_minutes,
             command=self._on_popup_slider_changed,
-            bg="#ffffff",
+            bg=COLORS["line"],
             troughcolor=COLORS["gold"],
-            activebackground="#ffffff",
+            activebackground=COLORS["muted"],
             highlightthickness=0,
             bd=0,
             width=8,
@@ -1266,9 +1266,9 @@ class StudyCityApp:
             showvalue=False,
             variable=self.daily_goal_hours,
             command=self._on_goal_slider_changed,
-            bg="#ffffff",
+            bg=COLORS["line"],
             troughcolor=COLORS["gold"],
-            activebackground="#ffffff",
+            activebackground=COLORS["muted"],
             highlightthickness=0,
             bd=0,
             width=8,
@@ -4867,12 +4867,19 @@ class StudyCityApp:
             )
 
         elif w_class == "Scale":
+            if self.theme_mode.get() == "light":
+                bg = COLORS["line"]
+                act_bg = COLORS["muted"]
+            else:
+                bg = COLORS["muted"]
+                act_bg = "#ffffff"
+                
             widget.configure(
-                bg="#ffffff",
+                bg=bg,
                 highlightbackground=COLORS["cream"],
                 fg=COLORS["ink"],
                 troughcolor=COLORS["gold"],
-                activebackground="#ffffff"
+                activebackground=act_bg
             )
 
         for child in widget.winfo_children():
