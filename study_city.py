@@ -475,8 +475,8 @@ class StudyCityApp:
         self.break_duration_minutes = tk.IntVar(
             value=self._clamp_minutes_value(self.data.get("break_duration_minutes", 5), 5, 5, 15)
         )
-        theme_mode = str(self.data.get("theme_mode", "dark"))
-        self.theme_mode = tk.StringVar(value=theme_mode if theme_mode in ("light", "dark") else "dark")
+        theme_mode = str(self.data.get("theme_mode", "light"))
+        self.theme_mode = tk.StringVar(value=theme_mode if theme_mode in ("light", "dark") else "light")
         today = date.today()
         self.calendar_year = today.year
         self.calendar_month = today.month
@@ -664,7 +664,10 @@ class StudyCityApp:
         toast.is_toast = True
         toast.overrideredirect(True)
         toast.attributes("-topmost", True)
-        toast.configure(bg=COLORS["navy"])
+        
+        # Hardcode premium dark charcoal background to ensure high readability on startup in both themes
+        toast_bg = "#111215"
+        toast.configure(bg=toast_bg)
 
         width, height = 330, 104
         screen_w = toast.winfo_screenwidth()
@@ -673,26 +676,26 @@ class StudyCityApp:
         y = max(12, screen_h - height - 62)
         toast.geometry(f"{width}x{height}+{x}+{y}")
 
-        frame = tk.Frame(toast, bg=COLORS["navy"], padx=16, pady=12)
+        frame = tk.Frame(toast, bg=toast_bg, padx=16, pady=12)
         frame.pack(fill="both", expand=True)
         tk.Label(
             frame,
             text="Lernreich",
-            bg=COLORS["navy"],
+            bg=toast_bg,
             fg="#ffffff",
             font=("Segoe UI", 15, "bold"),
         ).pack(anchor="w")
         tk.Label(
             frame,
             text=f"Heute: {date.today().strftime('%d.%m.%Y')}",
-            bg=COLORS["navy"],
+            bg=toast_bg,
             fg="#e7d7aa",
             font=("Segoe UI", 9),
         ).pack(anchor="w", pady=(3, 0))
         tk.Label(
             frame,
             text=f"{self.t('start_ready')} Lernreich laeuft.",
-            bg=COLORS["navy"],
+            bg=toast_bg,
             fg="#ffffff",
             font=("Segoe UI", 10),
         ).pack(anchor="w", pady=(7, 0))
