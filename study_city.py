@@ -5544,7 +5544,13 @@ class ModernButton(tk.Canvas):
         ]
         
         # Draw background container bg to avoid sharp edges matching master bg
-        parent_bg = self.master.cget("bg")
+        try:
+            parent_bg = self.master.cget("bg")
+        except Exception:
+            try:
+                parent_bg = self.master.cget("background")
+            except Exception:
+                parent_bg = COLORS["cream"]
         self.configure(bg=parent_bg)
         
         self.create_polygon(points, smooth=True, fill=bg_fill, outline="", width=0)
@@ -5618,7 +5624,13 @@ class IosSwitch(tk.Canvas):
         h = self.height
         
         # Apply parent bg to switch frame container
-        parent_bg = self.master.cget("bg")
+        try:
+            parent_bg = self.master.cget("bg")
+        except Exception:
+            try:
+                parent_bg = self.master.cget("background")
+            except Exception:
+                parent_bg = COLORS["cream"]
         self.configure(bg=parent_bg)
         
         # Switch background track
