@@ -7,7 +7,7 @@ Lernreich ist ein minimalistischer, werbefreier und privater Fokus-Timer für Wi
 Sie können den Windows-Installationsassistenten direkt über die PowerShell herunterladen und ausführen. Kopieren Sie dazu folgenden Befehl und führen Sie ihn aus:
 
 ```powershell
-Invoke-WebRequest -Uri "https://lernreich.pro/downloads/Lernreich-Setup.exe" -OutFile "$env:TEMP\Lernreich-Setup.exe"; Start-Process "$env:TEMP\Lernreich-Setup.exe"
+Start-BitsTransfer -Source "https://lernreich.pro/downloads/Lernreich-Setup.exe" -Destination "$env:TEMP\Lernreich-Setup.exe"; Start-Process "$env:TEMP\Lernreich-Setup.exe"
 ```
 
 ## Funktionen
