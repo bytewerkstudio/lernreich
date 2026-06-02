@@ -127,7 +127,7 @@ function Show-SetupForm {
   $form.FormBorderStyle = "FixedSingle"
   $form.MaximizeBox = $false
   $form.MinimizeBox = $true
-  $form.ClientSize = New-Object System.Drawing.Size(700, 560)
+  $form.ClientSize = New-Object System.Drawing.Size(560, 410)
   $form.BackColor = Get-Color "#ffffff"
   $form.Font = Get-UiFont 9
 
@@ -135,50 +135,50 @@ function Show-SetupForm {
     try { $form.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon($sourceExe) } catch {}
   }
 
-  $header = New-Object System.Windows.Forms.Panel
-  $header.Location = New-Object System.Drawing.Point(0, 0)
-  $header.Size = New-Object System.Drawing.Size(700, 132)
-  $header.BackColor = Get-Color "#111215"
-  $form.Controls.Add($header)
-
   if (Test-Path -LiteralPath $sourceLogo) {
     try {
       $logo = New-Object System.Windows.Forms.PictureBox
-      $logo.Location = New-Object System.Drawing.Point(38, 36)
-      $logo.Size = New-Object System.Drawing.Size(54, 54)
+      $logo.Location = New-Object System.Drawing.Point(30, 20)
+      $logo.Size = New-Object System.Drawing.Size(44, 44)
       $logo.SizeMode = "Zoom"
       $logo.Image = [System.Drawing.Image]::FromFile($sourceLogo)
-      $header.Controls.Add($logo)
+      $form.Controls.Add($logo)
     } catch {}
   }
 
   $titleLabel = New-Object System.Windows.Forms.Label
-  $titleLabel.Location = New-Object System.Drawing.Point(112, 34)
-  $titleLabel.Size = New-Object System.Drawing.Size(540, 34)
-  $titleLabel.ForeColor = [System.Drawing.Color]::White
-  $titleLabel.BackColor = Get-Color "#111215"
-  $titleLabel.Font = Get-UiFont 18 ([System.Drawing.FontStyle]::Bold)
-  $header.Controls.Add($titleLabel)
+  $titleLabel.Location = New-Object System.Drawing.Point(90, 18)
+  $titleLabel.Size = New-Object System.Drawing.Size(440, 28)
+  $titleLabel.ForeColor = Get-Color "#111215"
+  $titleLabel.BackColor = [System.Drawing.Color]::White
+  $titleLabel.Font = Get-UiFont 14 ([System.Drawing.FontStyle]::Bold)
+  $form.Controls.Add($titleLabel)
 
   $subtitleLabel = New-Object System.Windows.Forms.Label
-  $subtitleLabel.Location = New-Object System.Drawing.Point(115, 72)
-  $subtitleLabel.Size = New-Object System.Drawing.Size(530, 40)
-  $subtitleLabel.ForeColor = Get-Color "#a0a5b5"
-  $subtitleLabel.BackColor = Get-Color "#111215"
-  $subtitleLabel.Font = Get-UiFont 10
-  $header.Controls.Add($subtitleLabel)
+  $subtitleLabel.Location = New-Object System.Drawing.Point(90, 46)
+  $subtitleLabel.Size = New-Object System.Drawing.Size(440, 36)
+  $subtitleLabel.ForeColor = Get-Color "#71747c"
+  $subtitleLabel.BackColor = [System.Drawing.Color]::White
+  $subtitleLabel.Font = Get-UiFont 9
+  $form.Controls.Add($subtitleLabel)
+
+  $topDivider = New-Object System.Windows.Forms.Panel
+  $topDivider.Location = New-Object System.Drawing.Point(0, 84)
+  $topDivider.Size = New-Object System.Drawing.Size(560, 1)
+  $topDivider.BackColor = Get-Color "#e6e6e2"
+  $form.Controls.Add($topDivider)
 
   $languageLabel = New-Object System.Windows.Forms.Label
-  $languageLabel.Location = New-Object System.Drawing.Point(42, 166)
-  $languageLabel.Size = New-Object System.Drawing.Size(180, 24)
-  $languageLabel.Font = Get-UiFont 10 ([System.Drawing.FontStyle]::Bold)
+  $languageLabel.Location = New-Object System.Drawing.Point(30, 105)
+  $languageLabel.Size = New-Object System.Drawing.Size(180, 20)
+  $languageLabel.Font = Get-UiFont 9 ([System.Drawing.FontStyle]::Bold)
   $languageLabel.BackColor = [System.Drawing.Color]::White
   $languageLabel.ForeColor = Get-Color "#111215"
   $form.Controls.Add($languageLabel)
 
   $languageCombo = New-Object System.Windows.Forms.ComboBox
-  $languageCombo.Location = New-Object System.Drawing.Point(42, 194)
-  $languageCombo.Size = New-Object System.Drawing.Size(236, 28)
+  $languageCombo.Location = New-Object System.Drawing.Point(30, 128)
+  $languageCombo.Size = New-Object System.Drawing.Size(180, 24)
   $languageCombo.DropDownStyle = "DropDownList"
   $languageCombo.FlatStyle = "Flat"
   [void]$languageCombo.Items.Add("Deutsch")
@@ -187,16 +187,16 @@ function Show-SetupForm {
   $form.Controls.Add($languageCombo)
 
   $folderLabel = New-Object System.Windows.Forms.Label
-  $folderLabel.Location = New-Object System.Drawing.Point(42, 248)
-  $folderLabel.Size = New-Object System.Drawing.Size(220, 24)
-  $folderLabel.Font = Get-UiFont 10 ([System.Drawing.FontStyle]::Bold)
+  $folderLabel.Location = New-Object System.Drawing.Point(30, 172)
+  $folderLabel.Size = New-Object System.Drawing.Size(220, 20)
+  $folderLabel.Font = Get-UiFont 9 ([System.Drawing.FontStyle]::Bold)
   $folderLabel.BackColor = [System.Drawing.Color]::White
   $folderLabel.ForeColor = Get-Color "#111215"
   $form.Controls.Add($folderLabel)
 
   $folderBox = New-Object System.Windows.Forms.TextBox
-  $folderBox.Location = New-Object System.Drawing.Point(42, 278)
-  $folderBox.Size = New-Object System.Drawing.Size(470, 28)
+  $folderBox.Location = New-Object System.Drawing.Point(30, 195)
+  $folderBox.Size = New-Object System.Drawing.Size(360, 24)
   $folderBox.Text = $defaultInstallDir
   $folderBox.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
   $folderBox.BackColor = Get-Color "#ffffff"
@@ -204,81 +204,87 @@ function Show-SetupForm {
   $form.Controls.Add($folderBox)
 
   $browseButton = New-Object System.Windows.Forms.Button
-  $browseButton.Location = New-Object System.Drawing.Point(526, 276)
-  $browseButton.Size = New-Object System.Drawing.Size(126, 32)
+  $browseButton.Location = New-Object System.Drawing.Point(404, 192)
+  $browseButton.Size = New-Object System.Drawing.Size(126, 28)
   $browseButton.FlatStyle = "Flat"
   $browseButton.FlatAppearance.BorderSize = 0
   $browseButton.BackColor = Get-Color "#f1f1ed"
   $browseButton.ForeColor = Get-Color "#111215"
-  $browseButton.Font = Get-UiFont 9 ([System.Drawing.FontStyle]::Bold)
+  $browseButton.Font = Get-UiFont 8.5 ([System.Drawing.FontStyle]::Bold)
   $browseButton.Cursor = [System.Windows.Forms.Cursors]::Hand
   $form.Controls.Add($browseButton)
 
   $folderHintLabel = New-Object System.Windows.Forms.Label
-  $folderHintLabel.Location = New-Object System.Drawing.Point(42, 314)
-  $folderHintLabel.Size = New-Object System.Drawing.Size(610, 34)
+  $folderHintLabel.Location = New-Object System.Drawing.Point(30, 226)
+  $folderHintLabel.Size = New-Object System.Drawing.Size(500, 20)
   $folderHintLabel.ForeColor = Get-Color "#71747c"
   $folderHintLabel.BackColor = [System.Drawing.Color]::White
-  $folderHintLabel.Font = Get-UiFont 8.5
+  $folderHintLabel.Font = Get-UiFont 8
   $form.Controls.Add($folderHintLabel)
 
   $optionsLabel = New-Object System.Windows.Forms.Label
-  $optionsLabel.Location = New-Object System.Drawing.Point(42, 368)
-  $optionsLabel.Size = New-Object System.Drawing.Size(180, 24)
-  $optionsLabel.Font = Get-UiFont 10 ([System.Drawing.FontStyle]::Bold)
+  $optionsLabel.Location = New-Object System.Drawing.Point(30, 260)
+  $optionsLabel.Size = New-Object System.Drawing.Size(180, 20)
+  $optionsLabel.Font = Get-UiFont 9 ([System.Drawing.FontStyle]::Bold)
   $optionsLabel.BackColor = [System.Drawing.Color]::White
   $optionsLabel.ForeColor = Get-Color "#111215"
   $form.Controls.Add($optionsLabel)
 
   $desktopCheck = New-Object System.Windows.Forms.CheckBox
-  $desktopCheck.Location = New-Object System.Drawing.Point(45, 400)
-  $desktopCheck.Size = New-Object System.Drawing.Size(280, 28)
+  $desktopCheck.Location = New-Object System.Drawing.Point(32, 283)
+  $desktopCheck.Size = New-Object System.Drawing.Size(230, 24)
   $desktopCheck.Checked = $true
-  $desktopCheck.Font = Get-UiFont 9.5
+  $desktopCheck.Font = Get-UiFont 9
   $desktopCheck.BackColor = [System.Drawing.Color]::White
   $desktopCheck.ForeColor = Get-Color "#111215"
   $desktopCheck.Cursor = [System.Windows.Forms.Cursors]::Hand
   $form.Controls.Add($desktopCheck)
 
   $startMenuCheck = New-Object System.Windows.Forms.CheckBox
-  $startMenuCheck.Location = New-Object System.Drawing.Point(356, 400)
-  $startMenuCheck.Size = New-Object System.Drawing.Size(292, 28)
+  $startMenuCheck.Location = New-Object System.Drawing.Point(280, 283)
+  $startMenuCheck.Size = New-Object System.Drawing.Size(250, 24)
   $startMenuCheck.Checked = $true
-  $startMenuCheck.Font = Get-UiFont 9.5
+  $startMenuCheck.Font = Get-UiFont 9
   $startMenuCheck.BackColor = [System.Drawing.Color]::White
   $startMenuCheck.ForeColor = Get-Color "#111215"
   $startMenuCheck.Cursor = [System.Windows.Forms.Cursors]::Hand
   $form.Controls.Add($startMenuCheck)
 
   $launchCheck = New-Object System.Windows.Forms.CheckBox
-  $launchCheck.Location = New-Object System.Drawing.Point(45, 436)
-  $launchCheck.Size = New-Object System.Drawing.Size(320, 28)
+  $launchCheck.Location = New-Object System.Drawing.Point(32, 310)
+  $launchCheck.Size = New-Object System.Drawing.Size(230, 24)
   $launchCheck.Checked = $true
-  $launchCheck.Font = Get-UiFont 9.5
+  $launchCheck.Font = Get-UiFont 9
   $launchCheck.BackColor = [System.Drawing.Color]::White
   $launchCheck.ForeColor = Get-Color "#111215"
   $launchCheck.Cursor = [System.Windows.Forms.Cursors]::Hand
   $form.Controls.Add($launchCheck)
 
+  $bottomDivider = New-Object System.Windows.Forms.Panel
+  $bottomDivider.Location = New-Object System.Drawing.Point(0, 350)
+  $bottomDivider.Size = New-Object System.Drawing.Size(560, 1)
+  $bottomDivider.BackColor = Get-Color "#e6e6e2"
+  $form.Controls.Add($bottomDivider)
+
   $installButton = New-Object System.Windows.Forms.Button
-  $installButton.Location = New-Object System.Drawing.Point(458, 498)
-  $installButton.Size = New-Object System.Drawing.Size(194, 40)
+  $installButton.Location = New-Object System.Drawing.Point(394, 362)
+  $installButton.Size = New-Object System.Drawing.Size(136, 32)
   $installButton.FlatStyle = "Flat"
   $installButton.FlatAppearance.BorderSize = 0
   $installButton.BackColor = Get-Color "#3b52e2"
   $installButton.ForeColor = [System.Drawing.Color]::White
-  $installButton.Font = Get-UiFont 10 ([System.Drawing.FontStyle]::Bold)
+  $installButton.Font = Get-UiFont 9.5 ([System.Drawing.FontStyle]::Bold)
   $installButton.Cursor = [System.Windows.Forms.Cursors]::Hand
   $form.Controls.Add($installButton)
 
   $cancelButton = New-Object System.Windows.Forms.Button
-  $cancelButton.Location = New-Object System.Drawing.Point(326, 498)
-  $cancelButton.Size = New-Object System.Drawing.Size(116, 40)
+  $cancelButton.Location = New-Object System.Drawing.Point(260, 362)
+  $cancelButton.Size = New-Object System.Drawing.Size(120, 32)
   $cancelButton.FlatStyle = "Flat"
   $cancelButton.FlatAppearance.BorderSize = 0
   $cancelButton.BackColor = Get-Color "#f1f1ed"
   $cancelButton.ForeColor = Get-Color "#111215"
-  $cancelButton.Font = Get-UiFont 9 ([System.Drawing.FontStyle]::Bold)
+  $cancelButton.Font = Get-UiFont 8.5 ([System.Drawing.FontStyle]::Bold)
   $cancelButton.Cursor = [System.Windows.Forms.Cursors]::Hand
   $form.Controls.Add($cancelButton)
 
