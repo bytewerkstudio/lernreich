@@ -37,7 +37,7 @@ Wenn die Website später in einem GitHub-Repo liegt: in Netlify **„Add new sit
 Repo auswählen, **Publish directory = `website`** setzen. Jeder Push aktualisiert die Seite automatisch.
 
 ## Hinweis zum Download
-Der Hauptdownload ist `downloads/Lernreich-Setup.exe` (~20 MB, Version 1.2). Dieser Setup-Assistent
+Der Hauptdownload ist `downloads/Lernreich-Setup.exe` (~20 MB, Version 1.3). Dieser Setup-Assistent
 fragt Sprache, Installationsordner, Desktop-Verknüpfung, Startmenü-Verknüpfung und „nach der
 Installation starten" ab. Danach kopiert er Lernreich in den gewählten Ordner, registriert die
 Deinstallation in Windows. Nach Abschluss wird kein zusätzliches Erfolgsfenster angezeigt.
