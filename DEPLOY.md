@@ -54,9 +54,6 @@ Wenn `uploads\private-build\Lernreich.exe` aktualisiert wurde, den Installer dan
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\installer\build-installer.ps1
 ```
 
-Daneben liegt das Signatur-Zertifikat `Hijratullah-Haqmal-Zertifikat.cer`, das Besucher optional
-installieren können, damit Windows die App als vertrauenswürdig einstuft.
-
 Alternativ kannst du den Setup-Installer später über **GitHub-Releases** anbieten und in
 `index.html` den Download-Link (`downloads/Lernreich-Setup.exe`) entsprechend ändern.
 
