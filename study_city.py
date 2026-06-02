@@ -1063,7 +1063,7 @@ class StudyCityApp:
     def _build_timer_setup_frame(self, parent: tk.Frame) -> None:
         # Wrap everything in a container to enforce professional padding
         container = tk.Frame(parent, bg=COLORS["cream"])
-        container.pack(fill="both", expand=True, padx=30, pady=(12, 10))
+        container.pack(fill="both", expand=True, padx=30, pady=(6, 4))
 
         title_lbl = tk.Label(
             container,
@@ -1072,7 +1072,7 @@ class StudyCityApp:
             fg=COLORS["ink"],
             bg=COLORS["cream"]
         )
-        title_lbl.pack(anchor="w", pady=(5, 2))
+        title_lbl.pack(anchor="w", pady=(2, 0))
         
         subtitle_lbl = tk.Label(
             container,
@@ -1081,10 +1081,10 @@ class StudyCityApp:
             fg=COLORS["muted"],
             bg=COLORS["cream"]
         )
-        subtitle_lbl.pack(anchor="w", pady=(0, 15))
+        subtitle_lbl.pack(anchor="w", pady=(0, 6))
 
         input_container = tk.Frame(container, bg=COLORS["cream"])
-        input_container.pack(fill="x", pady=5)
+        input_container.pack(fill="x", pady=1)
         
         tk.Label(
             input_container,
@@ -1092,10 +1092,10 @@ class StudyCityApp:
             font=("Segoe UI", 9, "bold"),
             fg=COLORS["muted"],
             bg=COLORS["cream"]
-        ).pack(anchor="w", pady=(4, 4))
+        ).pack(anchor="w", pady=(2, 2))
         
         subject_bg = RoundedPanel(input_container, bg=COLORS["cream"], fill=COLORS["cream"], radius=8, height=36)
-        subject_bg.pack(fill="x", pady=(0, 8))
+        subject_bg.pack(fill="x", pady=(0, 4))
         self.subject_entry = tk.Entry(
             subject_bg.inner,
             textvariable=self.subject_text,
@@ -1116,10 +1116,10 @@ class StudyCityApp:
             font=("Segoe UI", 9, "bold"),
             fg=COLORS["muted"],
             bg=COLORS["cream"]
-        ).pack(anchor="w", pady=(4, 4))
+        ).pack(anchor="w", pady=(2, 2))
         
         goal_bg = RoundedPanel(input_container, bg=COLORS["cream"], fill=COLORS["cream"], radius=8, height=36)
-        goal_bg.pack(fill="x", pady=(0, 10))
+        goal_bg.pack(fill="x", pady=(0, 4))
         self.goal_entry = tk.Entry(
             goal_bg.inner,
             textvariable=self.goal_text,
@@ -1136,11 +1136,11 @@ class StudyCityApp:
 
         # Beautiful vertical stack of sliders with clean labels and live HSL-harmony styles
         sliders_container = tk.Frame(container, bg=COLORS["cream"])
-        sliders_container.pack(fill="x", pady=(5, 10))
+        sliders_container.pack(fill="x", pady=(2, 4))
 
         # 1. Slider: Duration (Dauer)
         dur_row = tk.Frame(sliders_container, bg=COLORS["cream"])
-        dur_row.pack(fill="x", pady=6)
+        dur_row.pack(fill="x", pady=2)
 
         dur_hdr = tk.Frame(dur_row, bg=COLORS["cream"])
         dur_hdr.pack(fill="x")
@@ -1171,13 +1171,13 @@ class StudyCityApp:
             variable=self.target_minutes,
             command=self._on_duration_slider_changed,
             width=450,
-            height=36
+            height=32
         )
-        self.dur_scale.pack(fill="x", pady=(4, 0))
+        self.dur_scale.pack(fill="x", pady=(2, 0))
 
         # 2. Slider: Popup Reminder (Popup)
         pop_row = tk.Frame(sliders_container, bg=COLORS["cream"])
-        pop_row.pack(fill="x", pady=6)
+        pop_row.pack(fill="x", pady=2)
 
         pop_hdr = tk.Frame(pop_row, bg=COLORS["cream"])
         pop_hdr.pack(fill="x")
@@ -1208,13 +1208,13 @@ class StudyCityApp:
             variable=self.reminder_minutes,
             command=self._on_popup_slider_changed,
             width=450,
-            height=36
+            height=32
         )
-        self.pop_scale.pack(fill="x", pady=(4, 0))
+        self.pop_scale.pack(fill="x", pady=(2, 0))
 
         # 3. Slider: Daily Goal (Tagesziel)
         goal_row = tk.Frame(sliders_container, bg=COLORS["cream"])
-        goal_row.pack(fill="x", pady=6)
+        goal_row.pack(fill="x", pady=2)
 
         goal_hdr = tk.Frame(goal_row, bg=COLORS["cream"])
         goal_hdr.pack(fill="x")
@@ -1245,13 +1245,13 @@ class StudyCityApp:
             variable=self.daily_goal_hours,
             command=self._on_goal_slider_changed,
             width=450,
-            height=36
+            height=32
         )
-        self.goal_scale.pack(fill="x", pady=(4, 0))
+        self.goal_scale.pack(fill="x", pady=(2, 0))
 
         self.chk_box = RoundedPanel(container, bg=COLORS["cream"], fill=COLORS["paper_dark"], radius=8)
-        self.chk_box.pack(fill="x", pady=12)
-        self.chk_box.inner.configure(padx=16, pady=10)
+        self.chk_box.pack(fill="x", pady=4)
+        self.chk_box.inner.configure(padx=16, pady=6)
         
         tk.Label(
             self.chk_box.inner,
@@ -1259,19 +1259,23 @@ class StudyCityApp:
             font=("Segoe UI", 8, "bold"),
             fg=COLORS["muted"],
             bg=COLORS["paper_dark"]
-        ).pack(anchor="w", pady=(0, 6))
+        ).pack(anchor="w", pady=(0, 3))
 
         self.checklist_vars = []
-        for item in FOCUS_CHECKLIST_ITEMS:
+        grid_frame = tk.Frame(self.chk_box.inner, bg=COLORS["paper_dark"])
+        grid_frame.pack(fill="x", pady=1)
+        grid_frame.columnconfigure((0, 1), weight=1)
+
+        for idx, item in enumerate(FOCUS_CHECKLIST_ITEMS):
             var = tk.BooleanVar(value=False)
             chk = tk.Checkbutton(
-                self.chk_box.inner,
+                grid_frame,
                 text=item,
                 variable=var,
                 command=self._on_checklist_changed,
                 bg=COLORS["paper_dark"],
                 activebackground=COLORS["paper_dark"],
-                selectcolor="#ffffff",
+                selectcolor=COLORS["cream"],
                 fg=COLORS["ink"],
                 activeforeground=COLORS["ink"],
                 font=("Segoe UI", 9),
@@ -1279,12 +1283,14 @@ class StudyCityApp:
                 relief="flat",
                 cursor="hand2"
             )
-            chk.pack(anchor="w", pady=2)
+            r_idx = idx // 2
+            c_idx = idx % 2
+            chk.grid(row=r_idx, column=c_idx, sticky="w", pady=1, padx=4)
             self.checklist_vars.append(var)
 
         # Setup buttons action frame
         setup_buttons = tk.Frame(container, bg=COLORS["cream"])
-        setup_buttons.pack(fill="x", pady=(12, 5))
+        setup_buttons.pack(fill="x", pady=(8, 2))
         setup_buttons.columnconfigure((0, 1), weight=1)
 
         self.start_timer_btn = tk.Button(
@@ -1300,7 +1306,7 @@ class StudyCityApp:
             cursor="hand2",
             state="normal",
             command=self.start_new_session_action,
-            pady=10
+            pady=8
         )
         self.start_timer_btn.grid(row=0, column=0, sticky="ew", padx=(0, 6))
 
@@ -1316,7 +1322,7 @@ class StudyCityApp:
             bd=0,
             cursor="hand2",
             command=self.resume_session_action,
-            pady=10
+            pady=8
         )
         self.resume_timer_btn.grid(row=0, column=1, sticky="ew", padx=(6, 0))
 
