@@ -1148,13 +1148,14 @@ class StudyCityApp:
             showvalue=False,
             variable=self.target_minutes,
             command=self._on_duration_slider_changed,
-            bg=COLORS["cream"],
-            troughcolor=COLORS["paper_dark"],
-            activebackground=COLORS["gold"],
+            bg="#ffffff",
+            troughcolor=COLORS["gold"],
+            activebackground="#ffffff",
             highlightthickness=0,
             bd=0,
             width=8,
-            sliderlength=16,
+            sliderlength=24,
+            length=450,
             sliderrelief="flat",
             cursor="hand2"
         )
@@ -1194,13 +1195,14 @@ class StudyCityApp:
             showvalue=False,
             variable=self.reminder_minutes,
             command=self._on_popup_slider_changed,
-            bg=COLORS["cream"],
-            troughcolor=COLORS["paper_dark"],
-            activebackground=COLORS["gold"],
+            bg="#ffffff",
+            troughcolor=COLORS["gold"],
+            activebackground="#ffffff",
             highlightthickness=0,
             bd=0,
             width=8,
-            sliderlength=16,
+            sliderlength=24,
+            length=450,
             sliderrelief="flat",
             cursor="hand2"
         )
@@ -1240,13 +1242,14 @@ class StudyCityApp:
             showvalue=False,
             variable=self.daily_goal_hours,
             command=self._on_goal_slider_changed,
-            bg=COLORS["cream"],
-            troughcolor=COLORS["paper_dark"],
-            activebackground=COLORS["gold"],
+            bg="#ffffff",
+            troughcolor=COLORS["gold"],
+            activebackground="#ffffff",
             highlightthickness=0,
             bd=0,
             width=8,
-            sliderlength=16,
+            sliderlength=24,
+            length=450,
             sliderrelief="flat",
             cursor="hand2"
         )
@@ -4810,21 +4813,12 @@ class StudyCityApp:
             )
 
         elif w_class == "Scale":
-            curr_bg = widget.cget("bg")
-            if curr_bg == LIGHT_COLORS["paper_dark"] or curr_bg == DARK_COLORS["paper_dark"]:
-                bg = COLORS["paper_dark"]
-            elif curr_bg == LIGHT_COLORS["paper"] or curr_bg == DARK_COLORS["paper"]:
-                bg = COLORS["paper"]
-            elif curr_bg == LIGHT_COLORS["cream"] or curr_bg == DARK_COLORS["cream"]:
-                bg = COLORS["cream"]
-            else:
-                bg = COLORS["cream"]
             widget.configure(
-                bg=bg,
-                highlightbackground=bg,
+                bg="#ffffff",
+                highlightbackground=COLORS["cream"],
                 fg=COLORS["ink"],
-                troughcolor=COLORS["paper_dark"],
-                activebackground=COLORS["gold"]
+                troughcolor=COLORS["gold"],
+                activebackground="#ffffff"
             )
 
         for child in widget.winfo_children():
