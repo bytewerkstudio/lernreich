@@ -1,61 +1,39 @@
-# ⏳ Lernreich – Schütze deine Lernzeit, sieh deinen Fortschritt
+# Lernreich
 
-**Lernreich** ist ein minimalistischer, werbefreier und 100% privater Fokus-Timer für Windows. Die App hilft dir, deine Lernzeit zu schützen, gesunde Lerngewohnheiten aufzubauen und deinen Lernfortschritt spielerisch zu verfolgen.
+Lernreich ist ein minimalistischer, werbefreier und privater Fokus-Timer für Windows. Die Anwendung unterstützt Sie dabei, Ihre Lernzeit zu schützen, gesunde Gewohnheiten aufzubauen und Ihren Fortschritt zu verfolgen.
 
----
+## PowerShell-Installation
 
-## ⚡ Schnellinstallation über PowerShell
-
-Du kannst die Windows-Installationsdatei direkt über deine PowerShell herunterladen und ausführen. Kopiere einfach den folgenden Befehl, füge ihn in deine PowerShell ein und drücke **Enter**:
+Sie können den Windows-Installationsassistenten direkt über die PowerShell herunterladen und ausführen. Kopieren Sie dazu folgenden Befehl und führen Sie ihn aus:
 
 ```powershell
 Invoke-WebRequest -Uri "https://lernreich.pro/downloads/Lernreich-Setup.exe" -OutFile "$env:TEMP\Lernreich-Setup.exe"; Start-Process "$env:TEMP\Lernreich-Setup.exe"
 ```
 
-*Dieser Befehl lädt die Installationsdatei sicher in dein temporäres Verzeichnis herunter und startet sofort den Windows-Installationsassistenten.*
+## Funktionen
 
----
+* **Fokus-Sanduhr:** Einstellbare Sessions bis zu 2,5 Stunden inklusive Vorbereitungs-Checkliste.
+* **XP- und Level-System:** Visualisierung des Lernfortschritts durch Erfahrungspunkte (1 Stunde = 100 XP).
+* **Streak-System:** Motivation durch tägliche Fokus-Serien (ab 10 Minuten Fokuszeit pro Tag).
+* **Aktivitäts-Heatmap:** Übersichtliche Darstellung der Lerntage in einer Heatmap im GitHub-Stil.
+* **Statistiken:** Auswertung von Gesamtstunden, absolvierten Einheiten und wöchentlichen Berichten.
+* **Lernjournal:** Lokales Speichern von Sitzungsnotizen als saubere Markdown-Dateien.
+* **Wiederholungen:** Integrierte Planung von Wiederholungen nach dem Prinzip der Spaced Repetition.
+* **Datenschutz:** 100% Offline-Betrieb. Keine Registrierung, keine Cloud-Anbindung, alle Daten verbleiben lokal.
 
-## ✨ Die wichtigsten Funktionen im Überblick
+## Systemvoraussetzungen
 
-Lernreich bietet dir alles, was du für konzentriertes Arbeiten brauchst, ohne dich durch unnötigen Schnickschnack abzulenken:
+* **Betriebssystem:** Windows 10 / Windows 11 (64-Bit)
+* **Speicherplatz:** ca. 50 MB
 
-*   **⏳ Fokus-Sanduhr**
-    Stelle eine Fokus-Sanduhr auf bis zu 2,5 Stunden ein. Eine interaktive Checkliste vor dem Start hilft dir, dich optimal vorzubereiten (z.B. Smartphone wegzulegen) und Ablenkungen zu eliminieren.
-*   **🎮 XP & Level-System**
-    Sammle XP für deine konzentrierte Lernzeit (1 Stunde Lernen = 100 XP). Steige im Level auf und mache deinen Fleiß visuell spürbar.
-*   **🔥 Streak-System**
-    Konzentriere dich täglich für mindestens 10 Minuten, um deine Serie (Streak) aufrechtzuerhalten, und sichere dir zusätzliche Streak-Bonus-XP.
-*   **📅 Aktivitäts-Heatmap**
-    Deine Lerntage werden in einer wunderschönen Aktivitäts-Heatmap im cleanen GitHub-Stil visualisiert. So erkennst du deine Lernmuster auf einen Blick.
-*   **📊 Statistiken & Wochenberichte**
-    Behalte deine Gesamtstunden, deine absolvierten Fokus-Sessions und deine Streaks im Auge. Ein kompakter Wochenbericht zeigt dir zudem dein am häufigsten gelerntes Fach.
-*   **📝 Lernjournal & Notizen**
-    Halte fest, was du in einer Session gelernt hast. Notizen werden lokal als saubere Markdown-Dateien auf deiner Festplatte gespeichert.
-*   **🔄 Spaced Repetition (Wiederholungen)**
-    Vergiss das Gelernte nicht: Plane strukturierte Wiederholungen für morgen, in 3 oder in 7 Tagen direkt in der App.
-*   **🛡️ 100% Offline & Datenschutzfreundlich**
-    Kein Cloud-Zwang, keine Registrierung und keine Werbung. Alle deine Daten verbleiben ausschließlich lokal auf deinem eigenen PC.
+## Entwicklung und Build
 
----
-
-## 💻 Systemvoraussetzungen
-
-*   **Betriebssystem:** Windows 10 oder Windows 11 (64-Bit)
-*   **Speicherplatz:** ca. 50 MB freier Speicherplatz
-
----
-
-## 🛠️ Entwicklung & Build des Installers
-
-Falls du den Installer selbst lokal kompilieren und erstellen möchtest, kannst du das im Repository enthaltene PowerShell-Skript nutzen:
+Um den Setup-Installer lokal neu zu erstellen, führen Sie folgendes Skript aus:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\installer\build-installer.ps1
 ```
 
-*Hinweis: Der signierte Setup-Assistent wird im Ordner `downloads/Lernreich-Setup.exe` ausgegeben.*
-
 ---
 
-*Entwickelt von [Bytewerk Studio](https://github.com/bytewerkstudio).*
+Entwickelt von [Bytewerk Studio](https://github.com/bytewerkstudio).
