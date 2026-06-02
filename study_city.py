@@ -180,25 +180,47 @@ TEXT = {
 }
 
 
-COLORS = {
+LIGHT_COLORS = {
     "ink": "#111215",        # Deep obsidian charcoal
     "muted": "#5e616c",      # Sleek muted gray
     "paper": "#fbfbfa",      # Warm, minimalist airy background
     "paper_dark": "#f1f1ed", # Slightly darker warm-gray
     "navy": "#111215",        # Matches ink
     "navy_light": "#1e2025",  # Soft dark gray for hover
-    "gold": "#3b52e2",        # Exquisite minimalist Indigo brand color
-    "gold_dark": "#2a3db6",   # Darker brand color for active states
-    "sage": "#16a34a",        # Clean, modern success green
-    "brick": "#d97706",       # Warm amber/orange
-    "clay": "#ea580c",        # Vibrant orange
-    "slate": "#4b5563",       # Stately slate gray
-    "cream": "#ffffff",       # Pure card white
-    "line": "#e6e6e2",        # Fine, clean border line
-    "success": "#16a34a",     # Success green
-    "danger": "#dc2626",      # Clean danger red
-    "shadow": "#eaeae6",      # Soft shadow
+    "gold": "#3b52e2",        # Exquisite brand indigo
+    "gold_dark": "#2a3db6",   # Darker brand color
+    "sage": "#16a34a",
+    "brick": "#d97706",
+    "clay": "#ea580c",
+    "slate": "#4b5563",
+    "cream": "#ffffff",
+    "line": "#e6e6e2",
+    "success": "#16a34a",
+    "danger": "#dc2626",
+    "shadow": "#eaeae6",
 }
+
+DARK_COLORS = {
+    "ink": "#fbfbfa",        # Light text
+    "muted": "#9ca3af",      # Muted gray text
+    "paper": "#090a0c",      # Deep dark obsidian background
+    "paper_dark": "#121317", # Slightly lighter dark gray for sidebar
+    "navy": "#fbfbfa",        # Light text for primary buttons
+    "navy_light": "#e5e7eb",  # Active button bg
+    "gold": "#3b52e2",        # Exquisite brand indigo
+    "gold_dark": "#5c6fff",   # Lighter brand indigo for dark mode contrast
+    "sage": "#22c55e",
+    "brick": "#f59e0b",
+    "clay": "#f97316",
+    "slate": "#9ca3af",
+    "cream": "#18191e",       # Dark card color
+    "line": "#262930",        # Dark border line
+    "success": "#22c55e",
+    "danger": "#ef4444",
+    "shadow": "#050507",
+}
+
+COLORS = dict(LIGHT_COLORS)
 
 
 REMINDER_MESSAGES = [
@@ -453,6 +475,8 @@ class StudyCityApp:
         self.break_duration_minutes = tk.IntVar(
             value=self._clamp_minutes_value(self.data.get("break_duration_minutes", 5), 5, 5, 15)
         )
+        theme_mode = str(self.data.get("theme_mode", "dark"))
+        self.theme_mode = tk.StringVar(value=theme_mode if theme_mode in ("light", "dark") else "dark")
         today = date.today()
         self.calendar_year = today.year
         self.calendar_month = today.month
@@ -464,6 +488,7 @@ class StudyCityApp:
 
         self._build_styles()
         self._build_layout()
+        self._apply_theme()
         self._restore_active_learning_note()
         self._bind_events()
         self._render_all()
@@ -1994,6 +2019,25 @@ class StudyCityApp:
             width=18,
         )
         break_duration_combo.grid(row=2, column=1, sticky="ew", pady=(0, 10))
+
+        # Theme Setting
+        tk.Label(
+            frame,
+            text="Farbschema",
+            bg=COLORS["cream"],
+            fg=COLORS["ink"],
+            font=("Segoe UI", 10),
+        ).grid(row=3, column=0, sticky="w", pady=(0, 10))
+
+        theme_label = tk.StringVar(value="Dunkel" if self.theme_mode.get() == "dark" else "Hell")
+        theme_combo = ttk.Combobox(
+            frame,
+            textvariable=theme_label,
+            values=["Hell", "Dunkel"],
+            state="readonly",
+            width=18,
+        )
+        theme_combo.grid(row=3, column=1, sticky="ew", pady=(0, 10))
         frame.grid_columnconfigure(1, weight=1)
 
         def save_settings() -> None:
@@ -2008,6 +2052,11 @@ class StudyCityApp:
             self.break_duration_minutes.set(mins)
             self.data["break_duration_minutes"] = mins
 
+            theme_mode = "dark" if theme_label.get() == "Dunkel" else "light"
+            self.theme_mode.set(theme_mode)
+            self.data["theme_mode"] = theme_mode
+            self._apply_theme()
+
             self.data["daily_goal_hours"] = self._daily_goal_hours()
             self.data["active_subject"] = self._current_subject()
             self._save_current_session()
@@ -2019,28 +2068,28 @@ class StudyCityApp:
             text=self.t("save"),
             style="Primary.TButton",
             command=save_settings,
-        ).grid(row=3, column=0, columnspan=2, sticky="ew", pady=(4, 10))
+        ).grid(row=4, column=0, columnspan=2, sticky="ew", pady=(4, 10))
 
         ttk.Button(
             frame,
             text=self.t("export_csv"),
             style="Secondary.TButton",
             command=lambda: self.export_sessions_csv(parent=popup),
-        ).grid(row=4, column=0, columnspan=2, sticky="ew", pady=(0, 10))
+        ).grid(row=5, column=0, columnspan=2, sticky="ew", pady=(0, 10))
 
         ttk.Button(
             frame,
             text=self.t("reset_all"),
             style="Danger.TButton",
             command=lambda: self.reset_all(parent=popup),
-        ).grid(row=5, column=0, columnspan=2, sticky="ew", pady=(0, 10))
+        ).grid(row=6, column=0, columnspan=2, sticky="ew", pady=(0, 10))
 
         ttk.Button(
             frame,
             text=self.t("close"),
             style="Secondary.TButton",
             command=popup.destroy,
-        ).grid(row=5, column=0, columnspan=2, sticky="ew")
+        ).grid(row=7, column=0, columnspan=2, sticky="ew")
 
         tk.Label(
             frame,
@@ -2048,7 +2097,7 @@ class StudyCityApp:
             bg=COLORS["cream"],
             fg=COLORS["muted"],
             font=("Segoe UI", 8),
-        ).grid(row=6, column=0, columnspan=2, sticky="w", pady=(14, 0))
+        ).grid(row=8, column=0, columnspan=2, sticky="w", pady=(14, 0))
 
     def export_sessions_csv(self, parent=None) -> None:
         sessions = list(self.data.get("sessions", []))
@@ -3396,7 +3445,8 @@ class StudyCityApp:
         width = max(600, int(c.winfo_width()))
         height = max(360, int(c.winfo_height()))
         self._last_city_minute = self.total_visible_seconds // 60
-        c.create_rectangle(0, 0, width, height, fill="#f7f8fa", outline="")
+        bg_fill = COLORS["paper"]
+        c.create_rectangle(0, 0, width, height, fill=bg_fill, outline="")
 
         margin = 24
         c.create_text(
@@ -4167,7 +4217,8 @@ class StudyCityApp:
         c.delete("all")
         width = max(320, int(c.winfo_width() or 600))
         height = int(c.winfo_height() or 360)
-        c.create_rectangle(0, 0, width, height, fill="#f7f8fa", outline="")
+        bg_fill = COLORS["paper"]
+        c.create_rectangle(0, 0, width, height, fill=bg_fill, outline="")
 
         compact = height < 430
         tiny = height < 330
@@ -4225,9 +4276,16 @@ class StudyCityApp:
                 info = totals.get(key, {"seconds": 0, "xp": 0, "bonus": 0})
                 in_month = day.month == self.calendar_month
                 complete = info["seconds"] >= goal_seconds
-                fill = "#dbecc6" if complete else "#ffffff"
-                if not in_month:
-                    fill = "#eee6d6"
+                
+                if self.theme_mode.get() == "dark":
+                    fill = "#1a3a22" if complete else "#1e1f24"
+                    if not in_month:
+                        fill = "#121316"
+                else:
+                    fill = "#dbecc6" if complete else "#ffffff"
+                    if not in_month:
+                        fill = "#eee6d6"
+                        
                 outline = COLORS["gold"] if day == today else COLORS["line"]
                 c.create_rectangle(x1, y1, x2, y2, fill=fill, outline=outline, width=2 if day == today else 1)
                 c.create_text(
@@ -4549,6 +4607,138 @@ class StudyCityApp:
         }
         return titles.get(level, "Bergtal-Siedlung")
 
+    def _apply_theme(self) -> None:
+        mode = self.theme_mode.get()
+        palette = DARK_COLORS if mode == "dark" else LIGHT_COLORS
+        for k, v in palette.items():
+            COLORS[k] = v
+            
+        # Re-build styles
+        self._build_styles()
+        
+        # Recursively update standard Tkinter widgets
+        self._update_widget_colors(self.root)
+        
+        # Re-draw canvasses and active panes
+        self._render_all()
+
+    def _update_widget_colors(self, widget) -> None:
+        try:
+            w_class = widget.winfo_class()
+        except Exception:
+            return
+
+        bg = None
+        fg = None
+
+        if isinstance(widget, RoundedPanel):
+            bg = COLORS["paper"]
+            fill = COLORS["cream"]
+            curr_bg = widget.cget("bg")
+            if curr_bg == LIGHT_COLORS["paper_dark"] or curr_bg == DARK_COLORS["paper_dark"]:
+                bg = COLORS["paper_dark"]
+            widget.update_colors(bg, fill)
+            for child in widget.winfo_children():
+                if child != widget.canvas:
+                    self._update_widget_colors(child)
+            return
+
+        if w_class in ("Frame", "Labelframe"):
+            curr_bg = widget.cget("bg")
+            if curr_bg == LIGHT_COLORS["paper_dark"] or curr_bg == DARK_COLORS["paper_dark"]:
+                bg = COLORS["paper_dark"]
+            elif curr_bg == LIGHT_COLORS["paper"] or curr_bg == DARK_COLORS["paper"]:
+                bg = COLORS["paper"]
+            elif curr_bg == LIGHT_COLORS["cream"] or curr_bg == DARK_COLORS["cream"]:
+                bg = COLORS["cream"]
+            else:
+                bg = COLORS["paper"]
+            widget.configure(bg=bg)
+            
+        elif w_class == "Label":
+            curr_bg = widget.cget("bg")
+            curr_fg = widget.cget("fg")
+            
+            if curr_bg == LIGHT_COLORS["paper_dark"] or curr_bg == DARK_COLORS["paper_dark"]:
+                bg = COLORS["paper_dark"]
+            elif curr_bg == LIGHT_COLORS["paper"] or curr_bg == DARK_COLORS["paper"]:
+                bg = COLORS["paper"]
+            elif curr_bg == LIGHT_COLORS["cream"] or curr_bg == DARK_COLORS["cream"]:
+                bg = COLORS["cream"]
+            elif curr_bg == LIGHT_COLORS["navy"] or curr_bg == DARK_COLORS["navy"]:
+                bg = COLORS["navy"]
+            else:
+                bg = COLORS["paper"]
+                
+            if curr_fg == LIGHT_COLORS["ink"] or curr_fg == DARK_COLORS["ink"]:
+                fg = COLORS["ink"]
+            elif curr_fg == LIGHT_COLORS["muted"] or curr_fg == DARK_COLORS["muted"]:
+                fg = COLORS["muted"]
+            elif curr_fg == LIGHT_COLORS["gold"] or curr_fg == DARK_COLORS["gold"]:
+                fg = COLORS["gold"]
+            elif curr_fg == "#ffffff" or curr_fg == "#ffffff":
+                fg = "#ffffff"
+            else:
+                fg = COLORS["ink"]
+                
+            widget.configure(bg=bg, fg=fg)
+            
+        elif w_class == "Button":
+            curr_bg = widget.cget("bg")
+            curr_fg = widget.cget("fg")
+            
+            if curr_bg == LIGHT_COLORS["paper_dark"] or curr_bg == DARK_COLORS["paper_dark"]:
+                bg = COLORS["paper_dark"]
+                fg = COLORS["muted"]
+                widget.configure(bg=bg, fg=fg, activebackground="#eef0fe" if self.theme_mode.get() == "light" else "#1e2030")
+            elif curr_bg == LIGHT_COLORS["navy"] or curr_bg == DARK_COLORS["navy"]:
+                bg = COLORS["navy"]
+                fg = COLORS["cream"]
+                widget.configure(bg=bg, fg=fg, activebackground=COLORS["navy_light"])
+            elif curr_bg == LIGHT_COLORS["paper_dark"] or curr_bg == DARK_COLORS["paper_dark"] or curr_bg == "#fbfbfa":
+                bg = COLORS["paper_dark"]
+                fg = COLORS["ink"]
+                widget.configure(bg=bg, fg=fg)
+            else:
+                bg = COLORS["paper_dark"]
+                fg = COLORS["ink"]
+                widget.configure(bg=bg, fg=fg)
+                
+        elif w_class == "Entry":
+            widget.configure(bg=COLORS["cream"], fg=COLORS["ink"], insertbackground=COLORS["ink"])
+            
+        elif w_class == "Spinbox":
+            widget.configure(bg=COLORS["cream"], fg=COLORS["ink"])
+            
+        elif w_class == "Canvas":
+            curr_bg = widget.cget("bg")
+            if curr_bg == LIGHT_COLORS["paper_dark"] or curr_bg == DARK_COLORS["paper_dark"]:
+                bg = COLORS["paper_dark"]
+            elif curr_bg == LIGHT_COLORS["paper"] or curr_bg == DARK_COLORS["paper"]:
+                bg = COLORS["paper"]
+            elif curr_bg == LIGHT_COLORS["cream"] or curr_bg == DARK_COLORS["cream"]:
+                bg = COLORS["cream"]
+            else:
+                bg = COLORS["paper"]
+            widget.configure(bg=bg)
+            
+        elif w_class == "Checkbutton":
+            curr_bg = widget.cget("bg")
+            if curr_bg == LIGHT_COLORS["paper_dark"] or curr_bg == DARK_COLORS["paper_dark"]:
+                bg = COLORS["paper_dark"]
+            else:
+                bg = COLORS["cream"]
+            widget.configure(
+                bg=bg,
+                fg=COLORS["ink"],
+                activebackground=bg,
+                activeforeground=COLORS["ink"],
+                selectcolor=COLORS["cream"]
+            )
+
+        for child in widget.winfo_children():
+            self._update_widget_colors(child)
+
     def _on_close(self) -> None:
         if self._quit_requested:
             self._save_current_session()
@@ -4568,6 +4758,13 @@ class RoundedPanel(tk.Frame):
         # Use tk.Frame instead of ttk.Frame for direct background color control
         self.inner = tk.Frame(self, bg=fill, bd=0, relief="flat")
         self.bind("<Configure>", self._draw)
+
+    def update_colors(self, bg: str, fill: str) -> None:
+        self.fill = fill
+        self.configure(bg=bg)
+        self.canvas.configure(bg=bg)
+        self.inner.configure(bg=fill)
+        self._draw()
 
     def _draw(self, _event=None) -> None:
         self.canvas.delete("all")
