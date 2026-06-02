@@ -5480,13 +5480,17 @@ class ModernButton(tk.Canvas):
             self.configure(cursor="hand2")
         self.draw()
 
-    def configure_button(self, text=None, bg=None, fg=None, font=None):
+    def configure_button(self, text=None, bg=None, fg=None, active_bg=None, active_fg=None, font=None):
         if text is not None:
             self.text = text
         if bg is not None:
             self.base_bg = bg
         if fg is not None:
             self.base_fg = fg
+        if active_bg is not None:
+            self.active_bg = active_bg
+        if active_fg is not None:
+            self.active_fg = active_fg
         if font is not None:
             self.font = font
         self.draw()
