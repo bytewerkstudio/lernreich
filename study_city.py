@@ -1163,25 +1163,15 @@ class StudyCityApp:
         )
         self.dur_value_lbl.pack(side="right")
 
-        self.dur_scale = tk.Scale(
+        self.dur_scale = ModernSlider(
             dur_row,
             from_=5,
             to=MAX_SESSION_MINUTES,
             resolution=5,
-            orient="horizontal",
-            showvalue=False,
             variable=self.target_minutes,
             command=self._on_duration_slider_changed,
-            bg=COLORS["line"],
-            troughcolor=COLORS["gold"],
-            activebackground=COLORS["muted"],
-            highlightthickness=0,
-            bd=0,
-            width=8,
-            sliderlength=24,
-            length=450,
-            sliderrelief="flat",
-            cursor="hand2"
+            width=450,
+            height=36
         )
         self.dur_scale.pack(fill="x", pady=(4, 0))
 
@@ -1210,25 +1200,15 @@ class StudyCityApp:
         )
         self.pop_value_lbl.pack(side="right")
 
-        self.pop_scale = tk.Scale(
+        self.pop_scale = ModernSlider(
             pop_row,
             from_=5,
             to=90,
             resolution=5,
-            orient="horizontal",
-            showvalue=False,
             variable=self.reminder_minutes,
             command=self._on_popup_slider_changed,
-            bg=COLORS["line"],
-            troughcolor=COLORS["gold"],
-            activebackground=COLORS["muted"],
-            highlightthickness=0,
-            bd=0,
-            width=8,
-            sliderlength=24,
-            length=450,
-            sliderrelief="flat",
-            cursor="hand2"
+            width=450,
+            height=36
         )
         self.pop_scale.pack(fill="x", pady=(4, 0))
 
@@ -1257,25 +1237,15 @@ class StudyCityApp:
         )
         self.goal_value_lbl.pack(side="right")
 
-        self.goal_scale = tk.Scale(
+        self.goal_scale = ModernSlider(
             goal_row,
             from_=0.5,
             to=12.0,
             resolution=0.5,
-            orient="horizontal",
-            showvalue=False,
             variable=self.daily_goal_hours,
             command=self._on_goal_slider_changed,
-            bg=COLORS["line"],
-            troughcolor=COLORS["gold"],
-            activebackground=COLORS["muted"],
-            highlightthickness=0,
-            bd=0,
-            width=8,
-            sliderlength=24,
-            length=450,
-            sliderrelief="flat",
-            cursor="hand2"
+            width=450,
+            height=36
         )
         self.goal_scale.pack(fill="x", pady=(4, 0))
 
@@ -1763,8 +1733,30 @@ class StudyCityApp:
         for index in range(3):
             text_var = tk.StringVar(value=items[index]["text"] if index < len(items) else "")
             done_var = tk.BooleanVar(value=items[index]["done"] if index < len(items) else False)
-            ttk.Checkbutton(frame, variable=done_var).grid(row=2 + index, column=0, sticky="w", pady=5)
-            entry = ttk.Entry(frame, textvariable=text_var)
+            chk = tk.Checkbutton(
+                frame,
+                variable=done_var,
+                bg=COLORS["cream"],
+                activebackground=COLORS["cream"],
+                selectcolor=COLORS["cream"],
+                bd=0,
+                relief="flat",
+                cursor="hand2"
+            )
+            chk.grid(row=2 + index, column=0, sticky="w", pady=5)
+            
+            entry = tk.Entry(
+                frame,
+                textvariable=text_var,
+                bg=COLORS["cream"],
+                fg=COLORS["ink"],
+                bd=0,
+                highlightthickness=1,
+                highlightbackground=COLORS["line"],
+                highlightcolor=COLORS["gold"],
+                font=("Segoe UI", 10),
+                insertbackground=COLORS["ink"]
+            )
             entry.grid(row=2 + index, column=1, columnspan=2, sticky="ew", padx=(8, 0), pady=5)
             rows.append((text_var, done_var))
         frame.grid_columnconfigure(1, weight=1)
@@ -1780,18 +1772,37 @@ class StudyCityApp:
             popup.destroy()
             self._render_all()
 
-        ttk.Button(
+        tk.Button(
             frame,
             text=self.t("save"),
-            style="Primary.TButton",
+            bg=COLORS["navy"],
+            fg=COLORS["cream"],
+            activebackground=COLORS["navy_light"],
+            activeforeground="#ffffff",
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            font=("Segoe UI", 10, "bold"),
+            pady=8,
             command=save_plan,
         ).grid(row=6, column=0, columnspan=3, sticky="ew", pady=(18, 8))
-        ttk.Button(
+        
+        tk.Button(
             frame,
             text=self.t("close"),
-            style="Secondary.TButton",
+            bg=COLORS["paper_dark"],
+            fg=COLORS["ink"],
+            activebackground=COLORS["line"],
+            activeforeground=COLORS["ink"],
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            font=("Segoe UI", 10),
+            pady=8,
             command=popup.destroy,
         ).grid(row=7, column=0, columnspan=3, sticky="ew")
+
+        self._update_widget_colors(popup)
 
     def open_week_report(self) -> None:
         report = self._week_report()
@@ -1854,12 +1865,22 @@ class StudyCityApp:
             justify="left",
             wraplength=490,
         ).pack(anchor="w", pady=(12, 12))
-        ttk.Button(
+        tk.Button(
             frame,
             text=self.t("close"),
-            style="Primary.TButton",
+            bg=COLORS["navy"],
+            fg=COLORS["cream"],
+            activebackground=COLORS["navy_light"],
+            activeforeground="#ffffff",
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            font=("Segoe UI", 10, "bold"),
+            pady=8,
             command=popup.destroy,
         ).pack(fill="x")
+
+        self._update_widget_colors(popup)
 
     def open_review_reminders(self) -> None:
         due_reviews = self._due_reviews()
@@ -1904,7 +1925,17 @@ class StudyCityApp:
             done_var = tk.BooleanVar(value=False)
             row = tk.Frame(frame, bg=COLORS["cream"])
             row.pack(fill="x", pady=5)
-            ttk.Checkbutton(row, variable=done_var).pack(side="left")
+            chk = tk.Checkbutton(
+                row,
+                variable=done_var,
+                bg=COLORS["cream"],
+                activebackground=COLORS["cream"],
+                selectcolor=COLORS["cream"],
+                bd=0,
+                relief="flat",
+                cursor="hand2"
+            )
+            chk.pack(side="left")
             text = (
                 f"{review.get('due', '')} · {review.get('subject', DEFAULT_SUBJECT)} · "
                 f"{self._short_text(str(review.get('goal', 'Lernsession')), 52)}"
@@ -1946,18 +1977,37 @@ class StudyCityApp:
             popup.destroy()
             self._render_all()
 
-        ttk.Button(
+        tk.Button(
             frame,
             text="Erledigte speichern",
-            style="Primary.TButton",
+            bg=COLORS["navy"],
+            fg=COLORS["cream"],
+            activebackground=COLORS["navy_light"],
+            activeforeground="#ffffff",
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            font=("Segoe UI", 10, "bold"),
+            pady=8,
             command=save_done,
         ).pack(fill="x", pady=(16, 8))
-        ttk.Button(
+        
+        tk.Button(
             frame,
             text=self.t("close"),
-            style="Secondary.TButton",
+            bg=COLORS["paper_dark"],
+            fg=COLORS["ink"],
+            activebackground=COLORS["line"],
+            activeforeground=COLORS["ink"],
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            font=("Segoe UI", 10),
+            pady=8,
             command=popup.destroy,
         ).pack(fill="x")
+
+        self._update_widget_colors(popup)
 
     def _due_reviews(self) -> list[tuple[int, dict]]:
         today_key = date.today().isoformat()
@@ -2048,19 +2098,37 @@ class StudyCityApp:
         ).pack(anchor="w", pady=(8, 14))
 
         for label, days in REVIEW_OPTIONS:
-            ttk.Button(
+            tk.Button(
                 frame,
                 text=label,
-                style="Secondary.TButton",
+                bg=COLORS["paper_dark"],
+                fg=COLORS["ink"],
+                activebackground=COLORS["line"],
+                activeforeground=COLORS["ink"],
+                relief="flat",
+                bd=0,
+                cursor="hand2",
+                font=("Segoe UI", 10),
+                pady=8,
                 command=lambda d=days: (self._schedule_review(session, d), popup.destroy()),
             ).pack(fill="x", pady=3)
 
-        ttk.Button(
+        tk.Button(
             frame,
             text="Nicht planen",
-            style="Primary.TButton",
+            bg=COLORS["navy"],
+            fg=COLORS["cream"],
+            activebackground=COLORS["navy_light"],
+            activeforeground="#ffffff",
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            font=("Segoe UI", 10, "bold"),
+            pady=8,
             command=popup.destroy,
         ).pack(fill="x", pady=(10, 0))
+
+        self._update_widget_colors(popup)
 
     def open_settings(self) -> None:
         popup = tk.Toplevel(self.root)
@@ -2163,31 +2231,62 @@ class StudyCityApp:
             self.status_text.set(self.t("language_saved"))
             popup.destroy()
 
-        ttk.Button(
+        tk.Button(
             frame,
             text=self.t("save"),
-            style="Primary.TButton",
+            bg=COLORS["navy"],
+            fg=COLORS["cream"],
+            activebackground=COLORS["navy_light"],
+            activeforeground="#ffffff",
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            font=("Segoe UI", 10, "bold"),
+            pady=8,
             command=save_settings,
         ).grid(row=4, column=0, columnspan=2, sticky="ew", pady=(4, 10))
 
-        ttk.Button(
+        tk.Button(
             frame,
             text=self.t("export_csv"),
-            style="Secondary.TButton",
+            bg=COLORS["paper_dark"],
+            fg=COLORS["ink"],
+            activebackground=COLORS["line"],
+            activeforeground=COLORS["ink"],
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            font=("Segoe UI", 10),
+            pady=8,
             command=lambda: self.export_sessions_csv(parent=popup),
         ).grid(row=5, column=0, columnspan=2, sticky="ew", pady=(0, 10))
 
-        ttk.Button(
+        tk.Button(
             frame,
             text=self.t("reset_all"),
-            style="Danger.TButton",
+            bg=COLORS["danger"],
+            fg="#ffffff",
+            activebackground="#b91c1c" if self.theme_mode.get() == "light" else "#f87171",
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            font=("Segoe UI", 10),
+            pady=8,
             command=lambda: self.reset_all(parent=popup),
         ).grid(row=6, column=0, columnspan=2, sticky="ew", pady=(0, 10))
 
-        ttk.Button(
+        tk.Button(
             frame,
             text=self.t("close"),
-            style="Secondary.TButton",
+            bg=COLORS["paper_dark"],
+            fg=COLORS["ink"],
+            activebackground=COLORS["line"],
+            activeforeground=COLORS["ink"],
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            font=("Segoe UI", 10),
+            pady=8,
             command=popup.destroy,
         ).grid(row=7, column=0, columnspan=2, sticky="ew")
 
@@ -2198,6 +2297,8 @@ class StudyCityApp:
             fg=COLORS["muted"],
             font=("Segoe UI", 8),
         ).grid(row=8, column=0, columnspan=2, sticky="w", pady=(14, 0))
+
+        self._update_widget_colors(popup)
 
     def export_sessions_csv(self, parent=None) -> None:
         sessions = list(self.data.get("sessions", []))
@@ -2412,7 +2513,21 @@ class StudyCityApp:
         checks = []
         for item in FOCUS_CHECKLIST_ITEMS:
             var = tk.BooleanVar(value=False)
-            ttk.Checkbutton(frame, text=item, variable=var).pack(anchor="w", pady=5)
+            chk = tk.Checkbutton(
+                frame,
+                text=item,
+                variable=var,
+                bg=COLORS["cream"],
+                activebackground=COLORS["cream"],
+                selectcolor=COLORS["cream"],
+                fg=COLORS["ink"],
+                activeforeground=COLORS["ink"],
+                font=("Segoe UI", 10),
+                bd=0,
+                relief="flat",
+                cursor="hand2"
+            )
+            chk.pack(anchor="w", pady=5)
             checks.append(var)
 
         result = {"start": False}
@@ -2424,21 +2539,41 @@ class StudyCityApp:
             result["start"] = True
             popup.destroy()
 
-        buttons = ttk.Frame(frame, style="Panel.TFrame")
+        buttons = tk.Frame(frame, bg=COLORS["cream"])
         buttons.pack(fill="x", pady=(18, 0))
         buttons.grid_columnconfigure((0, 1), weight=1)
-        ttk.Button(
+        
+        tk.Button(
             buttons,
             text="Fokus starten",
-            style="Primary.TButton",
+            bg=COLORS["navy"],
+            fg=COLORS["cream"],
+            activebackground=COLORS["navy_light"],
+            activeforeground="#ffffff",
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            font=("Segoe UI", 10, "bold"),
+            pady=8,
             command=start_focus,
         ).grid(row=0, column=0, sticky="ew", padx=(0, 7))
-        ttk.Button(
+        
+        tk.Button(
             buttons,
             text=self.t("close"),
-            style="Secondary.TButton",
+            bg=COLORS["paper_dark"],
+            fg=COLORS["ink"],
+            activebackground=COLORS["line"],
+            activeforeground=COLORS["ink"],
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            font=("Segoe UI", 10),
+            pady=8,
             command=popup.destroy,
         ).grid(row=0, column=1, sticky="ew", padx=(7, 0))
+
+        self._update_widget_colors(popup)
 
         popup.protocol("WM_DELETE_WINDOW", popup.destroy)
         self.root.wait_window(popup)
@@ -2651,7 +2786,18 @@ class StudyCityApp:
             font=("Segoe UI", 9, "bold"),
         ).pack(anchor="w")
         reason_note = tk.StringVar()
-        note_entry = ttk.Entry(frame, textvariable=reason_note)
+        note_entry = tk.Entry(
+            frame,
+            textvariable=reason_note,
+            bg=COLORS["cream"],
+            fg=COLORS["ink"],
+            bd=0,
+            highlightthickness=1,
+            highlightbackground=COLORS["line"],
+            highlightcolor=COLORS["gold"],
+            font=("Segoe UI", 10),
+            insertbackground=COLORS["ink"]
+        )
         note_entry.pack(fill="x", pady=(6, 12))
 
         tk.Label(
@@ -2663,7 +2809,18 @@ class StudyCityApp:
         ).pack(anchor="w")
 
         phrase = tk.StringVar()
-        entry = ttk.Entry(frame, textvariable=phrase)
+        entry = tk.Entry(
+            frame,
+            textvariable=phrase,
+            bg=COLORS["cream"],
+            fg=COLORS["ink"],
+            bd=0,
+            highlightthickness=1,
+            highlightbackground=COLORS["line"],
+            highlightcolor=COLORS["gold"],
+            font=("Segoe UI", 10),
+            insertbackground=COLORS["ink"]
+        )
         entry.pack(fill="x", pady=(6, 14))
         result = {"abandoned": False}
 
@@ -2691,15 +2848,40 @@ class StudyCityApp:
             if close_after:
                 self.root.destroy()
 
-        buttons = ttk.Frame(frame, style="Panel.TFrame")
+        buttons = tk.Frame(frame, bg=COLORS["cream"])
         buttons.pack(fill="x")
         buttons.grid_columnconfigure((0, 1), weight=1)
-        ttk.Button(buttons, text="Weiterlernen", style="Primary.TButton", command=keep_learning).grid(
-            row=0, column=0, sticky="ew", padx=(0, 7)
-        )
-        ttk.Button(buttons, text="XP verlieren", style="Danger.TButton", command=abandon).grid(
-            row=0, column=1, sticky="ew", padx=(7, 0)
-        )
+        
+        tk.Button(
+            buttons,
+            text="Weiterlernen",
+            bg=COLORS["navy"],
+            fg=COLORS["cream"],
+            activebackground=COLORS["navy_light"],
+            activeforeground="#ffffff",
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            font=("Segoe UI", 10, "bold"),
+            pady=8,
+            command=keep_learning
+        ).grid(row=0, column=0, sticky="ew", padx=(0, 7))
+        
+        tk.Button(
+            buttons,
+            text="XP verlieren",
+            bg=COLORS["danger"],
+            fg="#ffffff",
+            activebackground="#b91c1c" if self.theme_mode.get() == "light" else "#f87171",
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            font=("Segoe UI", 10),
+            pady=8,
+            command=abandon
+        ).grid(row=0, column=1, sticky="ew", padx=(7, 0))
+
+        self._update_widget_colors(popup)
         entry.focus_set()
         popup.protocol("WM_DELETE_WINDOW", keep_learning)
         self.root.wait_window(popup)
@@ -3103,12 +3285,23 @@ class StudyCityApp:
             justify="left",
         ).pack(anchor="w", pady=(10, 16))
 
-        ttk.Button(
+        tk.Button(
             frame,
             text="Weiterlernen",
-            style="Primary.TButton",
+            bg=COLORS["navy"],
+            fg=COLORS["cream"],
+            activebackground=COLORS["navy_light"],
+            activeforeground="#ffffff",
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            font=("Segoe UI", 10, "bold"),
+            padx=14,
+            pady=8,
             command=popup.destroy,
         ).pack(anchor="e")
+
+        self._update_widget_colors(popup)
         popup.after(18000, popup.destroy)
 
     def _show_reminder(self, checkpoint: int) -> None:
@@ -4758,6 +4951,10 @@ class StudyCityApp:
         bg = None
         fg = None
 
+        if isinstance(widget, ModernSlider):
+            widget.draw_safe()
+            return
+
         if isinstance(widget, RoundedPanel):
             bg = COLORS["paper"]
             fill = COLORS["cream"]
@@ -4814,7 +5011,10 @@ class StudyCityApp:
             curr_bg = widget.cget("bg")
             curr_fg = widget.cget("fg")
             
-            if curr_bg == LIGHT_COLORS["paper_dark"] or curr_bg == DARK_COLORS["paper_dark"]:
+            if curr_bg == LIGHT_COLORS["danger"] or curr_bg == DARK_COLORS["danger"] or curr_bg == "#dc2626" or curr_bg == "#ef4444":
+                bg = COLORS["danger"]
+                widget.configure(bg=bg, fg="#ffffff", activebackground="#b91c1c" if self.theme_mode.get() == "light" else "#f87171")
+            elif curr_bg == LIGHT_COLORS["paper_dark"] or curr_bg == DARK_COLORS["paper_dark"]:
                 bg = COLORS["paper_dark"]
                 fg = COLORS["muted"]
                 widget.configure(bg=bg, fg=fg, activebackground="#eef0fe" if self.theme_mode.get() == "light" else "#1e2030")
@@ -4832,7 +5032,13 @@ class StudyCityApp:
                 widget.configure(bg=bg, fg=fg)
                 
         elif w_class == "Entry":
-            widget.configure(bg=COLORS["cream"], fg=COLORS["ink"], insertbackground=COLORS["ink"])
+            widget.configure(
+                bg=COLORS["cream"],
+                fg=COLORS["ink"],
+                insertbackground=COLORS["ink"],
+                highlightbackground=COLORS["line"],
+                highlightcolor=COLORS["gold"]
+            )
             
         elif w_class == "Spinbox":
             widget.configure(bg=COLORS["cream"], fg=COLORS["ink"])
@@ -4943,6 +5149,164 @@ class RoundedPanel(tk.Frame):
             x1, y1
         ]
         self.canvas.create_polygon(points, smooth=True, **kwargs)
+
+
+class ModernSlider(tk.Canvas):
+    def __init__(self, master, from_, to, resolution, variable, command=None, width=450, height=44, **kwargs):
+        self.from_ = from_
+        self.to = to
+        self.resolution = resolution
+        self.variable = variable
+        self.command = command
+        self.width = width
+        self.height = height
+        
+        self.padding_x = 20
+        self.track_height = 6
+        self.handle_radius = 9
+        
+        self.hovered = False
+        self.dragging = False
+        
+        bg_color = COLORS["cream"]
+        super().__init__(master, width=width, height=height, bg=bg_color, bd=0, highlightthickness=0, cursor="hand2", **kwargs)
+        
+        self.bind("<Button-1>", self._on_click)
+        self.bind("<B1-Motion>", self._on_drag)
+        self.bind("<ButtonRelease-1>", self._on_release)
+        self.bind("<Enter>", self._on_enter)
+        self.bind("<Leave>", self._on_leave)
+        
+        self.trace_name = self.variable.trace_add("write", lambda *args: self.draw_safe())
+        self.bind("<Destroy>", lambda e: self._cleanup())
+        
+        self.draw()
+
+    def _cleanup(self):
+        try:
+            self.variable.trace_remove("write", self.trace_name)
+        except Exception:
+            pass
+
+    def _val_to_x(self, val):
+        usable_width = self.width - 2 * self.padding_x
+        percent = (val - self.from_) / (self.to - self.from_)
+        return self.padding_x + percent * usable_width
+
+    def _x_to_val(self, x):
+        usable_width = self.width - 2 * self.padding_x
+        percent = (x - self.padding_x) / usable_width
+        percent = min(1.0, max(0.0, percent))
+        val = self.from_ + percent * (self.to - self.from_)
+        steps = round(val / self.resolution)
+        val = steps * self.resolution
+        return min(self.to, max(self.from_, val))
+
+    def _on_enter(self, event):
+        self.hovered = True
+        self.draw_safe()
+
+    def _on_leave(self, event):
+        self.hovered = False
+        self.draw_safe()
+
+    def _on_release(self, event):
+        self.dragging = False
+        self.draw_safe()
+
+    def draw_safe(self):
+        try:
+            if self.winfo_exists():
+                self.draw()
+        except Exception:
+            pass
+
+    def draw(self):
+        self.delete("all")
+        bg_color = COLORS["cream"]
+        self.configure(bg=bg_color)
+        
+        cy = self.height / 2
+        start_x = self.padding_x
+        end_x = self.width - self.padding_x
+        
+        try:
+            val = self.variable.get()
+        except Exception:
+            val = self.from_
+        
+        hx = self._val_to_x(val)
+        
+        # 1. Draw elegant calibration tick dots along the track
+        # Setup major intervals depending on from_/to values
+        # For focus-dauer: ticks at 30, 60, 90, 120, 150, 180 Min
+        # For popup: ticks at 15, 30, 45, 60, 75, 90 Min
+        # For daily goal: ticks at 2, 4, 6, 8, 10, 12 Std
+        ticks = []
+        if self.from_ == 5 and self.to == 180: # Duration
+            ticks = [30, 60, 90, 120, 150, 180]
+        elif self.from_ == 5 and self.to == 90: # Popup
+            ticks = [15, 30, 45, 60, 75, 90]
+        elif self.from_ == 0.5 and self.to == 12.0: # Daily goal
+            ticks = [2, 4, 6, 8, 10, 12]
+            
+        # Draw background empty track (inactive section)
+        track_color = COLORS["line"]
+        self.create_line(start_x, cy, end_x, cy, width=self.track_height, capstyle="round", fill=track_color)
+        
+        # Draw ticks
+        for t_val in ticks:
+            tx = self._val_to_x(t_val)
+            # Dot radius
+            tr = 3
+            # If the tick is behind the handle, it's active
+            dot_color = COLORS["gold"] if tx <= hx else COLORS["line"]
+            self.create_oval(tx - tr, cy - tr, tx + tr, cy + tr, fill=dot_color, outline="", width=0)
+            
+        # 2. Left filled progress track
+        if hx > start_x:
+            self.create_line(start_x, cy, hx, cy, width=self.track_height, capstyle="round", fill=COLORS["gold"])
+            
+        # 3. Soft handle shadow
+        r = self.handle_radius
+        # Soft shadow offset
+        sy = cy + 2
+        sx = hx + 1
+        shadow_color = COLORS["shadow"]
+        # Only draw shadow if it exists and is dark enough
+        if shadow_color.lower() != "#ffffff":
+            self.create_oval(sx - r, sy - r, sx + r, sy + r, fill=shadow_color, outline="", width=0)
+            
+        # 4. Glowing halo on hover or drag
+        if self.hovered or self.dragging:
+            halo_r = r + 7
+            # Soft brand glow color
+            # Light mode brand: #3b52e2 -> soft glow is e.g. #eef0fe
+            # Dark mode brand: #3b52e2 -> soft glow is e.g. #222544
+            is_dark = (COLORS["paper"] == DARK_COLORS["paper"])
+            halo_color = "#202444" if is_dark else "#eef0fe"
+            self.create_oval(hx - halo_r, cy - halo_r, hx + halo_r, cy + halo_r, fill=halo_color, outline="", width=0)
+
+        # 5. Handle circle (Tactile white button)
+        self.create_oval(hx - r, cy - r, hx + r, cy + r, fill="#ffffff", outline=COLORS["gold"], width=2.5)
+        # Inner tiny dot
+        self.create_oval(hx - 2.5, cy - 2.5, hx + 2.5, cy + 2.5, fill=COLORS["gold"], outline="", width=0)
+
+    def _on_click(self, event):
+        self.dragging = True
+        val = self._x_to_val(event.x)
+        self.variable.set(val)
+        self.draw()
+        if self.command:
+            self.command(str(val))
+
+    def _on_drag(self, event):
+        self.dragging = True
+        val = self._x_to_val(event.x)
+        self.variable.set(val)
+        self.draw()
+        if self.command:
+            self.command(str(val))
 
 
 if __name__ == "__main__":
