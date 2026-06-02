@@ -132,6 +132,10 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
                     Lernjournal
                   </button>
+                  <button class="nav-item" data-tab="settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    Einstellungen
+                  </button>
                 </nav>
                 
                 <div class="sidebar-xp">
@@ -142,7 +146,7 @@
                   <div class="xp-bar-outer">
                     <div class="xp-bar-inner" id="mockup-xp-bar" style="width: 80%;"></div>
                   </div>
-                  <div class="sidebar-version" style="font-size: 0.62rem; color: var(--faint); text-align: center; margin-top: 10px; font-weight: 500; letter-spacing: 0.02em; opacity: 0.8;">v1.2</div>
+                  <div class="sidebar-version">Version 1.2</div>
                 </div>
               </aside>
               
@@ -285,6 +289,39 @@
                       </div>
                       <h5>Marktformen &amp; Preiselastizität</h5>
                       <p>Einfluss von Angebot und Nachfrage bei unterschiedlichen Preiselastizitäten untersucht. Monopol vs. Polypol und Oligopol sowie deren Preiskurven...</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Tab 4: Einstellungen -->
+                <div class="mockup-tab-content" id="tab-settings" style="display: none;">
+                  <h3>Einstellungen</h3>
+                  <p class="tab-desc">Lokale Einstellungen der Lernreich Windows-App.</p>
+                  
+                  <div class="checklist-box" style="margin-bottom: 16px;">
+                    <span class="box-title">System &amp; Benachrichtigungen</span>
+                    <div class="check-items">
+                      <label class="check-item">
+                        <input type="checkbox" class="mockup-checkbox" checked />
+                        <span class="custom-box">
+                          <svg class="check-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                        </span>
+                        <span class="check-text">Tonsignal bei Timer-Ablauf abspielen</span>
+                      </label>
+                      <label class="check-item">
+                        <input type="checkbox" class="mockup-checkbox" checked />
+                        <span class="custom-box">
+                          <svg class="check-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                        </span>
+                        <span class="check-text">Windows-Systembenachrichtigung senden</span>
+                      </label>
+                      <label class="check-item">
+                        <input type="checkbox" class="mockup-checkbox" />
+                        <span class="custom-box">
+                          <svg class="check-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                        </span>
+                        <span class="check-text">Automatische Backups erstellen (Täglich)</span>
+                      </label>
                     </div>
                   </div>
                 </div>
