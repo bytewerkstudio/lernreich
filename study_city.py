@@ -903,44 +903,6 @@ class StudyCityApp:
             btn.configure(command=lambda v=view_id: self.switch_view(v))
             self.nav_buttons[view_id] = btn
 
-        # Gear/Settings button at the bottom of nav
-        settings_btn = tk.Button(
-            self.nav_frame,
-            text="⚙  Einstellungen",
-            font=("Segoe UI", 10),
-            anchor="w",
-            padx=16,
-            pady=10,
-            relief="flat",
-            bd=0,
-            cursor="hand2",
-            bg=COLORS["paper_dark"],
-            fg=COLORS["muted"],
-            activebackground="#eef0fe",
-            activeforeground="#3b52e2",
-            command=self.open_settings
-        )
-        settings_btn.pack(fill="x", pady=(20, 0))
-
-        # Theme Toggle button in sidebar
-        self.theme_toggle_btn = tk.Button(
-            self.nav_frame,
-            text="☀️  Hell-Modus" if self.theme_mode.get() == "dark" else "🌙  Dunkel-Modus",
-            font=("Segoe UI", 10),
-            anchor="w",
-            padx=16,
-            pady=10,
-            relief="flat",
-            bd=0,
-            cursor="hand2",
-            bg=COLORS["paper_dark"],
-            fg=COLORS["muted"],
-            activebackground="#eef0fe",
-            activeforeground="#3b52e2",
-            command=self.toggle_theme
-        )
-        self.theme_toggle_btn.pack(fill="x", pady=3)
-
         # Bottom XP Progress Area
         self.xp_sidebar_frame = tk.Frame(parent, bg=COLORS["paper_dark"])
         self.xp_sidebar_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=24)
@@ -956,15 +918,56 @@ class StudyCityApp:
         self.xp_sidebar_canvas = tk.Canvas(self.xp_sidebar_frame, height=8, bg=COLORS["paper_dark"], bd=0, highlightthickness=0)
         self.xp_sidebar_canvas.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(6, 0))
 
-        # Version label directly under the XP Progress Area, right-aligned
+        # Bottom Utility Bar (Icons for Settings, Dark Mode and Version)
+        utils_frame = tk.Frame(self.xp_sidebar_frame, bg=COLORS["paper_dark"])
+        utils_frame.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(10, 0))
+        utils_frame.columnconfigure(2, weight=1)
+
+        # 1. Gear/Settings button
+        settings_btn = tk.Button(
+            utils_frame,
+            text="⚙️",
+            font=("Segoe UI", 10),
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            bg=COLORS["paper_dark"],
+            fg=COLORS["muted"],
+            activebackground="#eef0fe" if self.theme_mode.get() == "light" else "#1e2025",
+            activeforeground="#3b52e2",
+            padx=6,
+            pady=4,
+            command=self.open_settings
+        )
+        settings_btn.grid(row=0, column=0, sticky="w", padx=(0, 4))
+
+        # 2. Theme Toggle button
+        self.theme_toggle_btn = tk.Button(
+            utils_frame,
+            text="☀️" if self.theme_mode.get() == "dark" else "🌙",
+            font=("Segoe UI", 10),
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            bg=COLORS["paper_dark"],
+            fg=COLORS["muted"],
+            activebackground="#eef0fe" if self.theme_mode.get() == "light" else "#1e2025",
+            activeforeground="#3b52e2",
+            padx=6,
+            pady=4,
+            command=self.toggle_theme
+        )
+        self.theme_toggle_btn.grid(row=0, column=1, sticky="w", padx=4)
+
+        # 3. Version label (pushed to the right)
         self.sidebar_version_lbl = tk.Label(
-            self.xp_sidebar_frame,
-            text=f"Version {APP_VERSION}",
-            font=("Segoe UI", 7),
+            utils_frame,
+            text=f"v{APP_VERSION}",
+            font=("Segoe UI", 7, "bold"),
             fg=COLORS["muted"],
             bg=COLORS["paper_dark"]
         )
-        self.sidebar_version_lbl.grid(row=2, column=0, columnspan=2, sticky="e", pady=(4, 0))
+        self.sidebar_version_lbl.grid(row=0, column=2, sticky="e", pady=(4, 0))
 
     def _draw_streak_preview(self) -> None:
         c = self.streak_preview_canvas
@@ -4921,7 +4924,7 @@ class StudyCityApp:
         # Update sidebar theme toggle button text if exists
         if hasattr(self, "theme_toggle_btn") and self.theme_toggle_btn.winfo_exists():
             self.theme_toggle_btn.configure(
-                text="☀️  Hell-Modus" if mode == "dark" else "🌙  Dunkel-Modus"
+                text="☀️" if mode == "dark" else "🌙"
             )
         
         # Re-draw canvasses and active panes
