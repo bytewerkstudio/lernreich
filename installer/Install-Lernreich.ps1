@@ -128,7 +128,7 @@ function Show-SetupForm {
   $form.MaximizeBox = $false
   $form.MinimizeBox = $true
   $form.ClientSize = New-Object System.Drawing.Size(700, 560)
-  $form.BackColor = Get-Color "#f7f7f5"
+  $form.BackColor = Get-Color "#ffffff"
   $form.Font = Get-UiFont 9
 
   if (Test-Path -LiteralPath $sourceExe) {
@@ -138,7 +138,7 @@ function Show-SetupForm {
   $header = New-Object System.Windows.Forms.Panel
   $header.Location = New-Object System.Drawing.Point(0, 0)
   $header.Size = New-Object System.Drawing.Size(700, 132)
-  $header.BackColor = Get-Color "#18191c"
+  $header.BackColor = Get-Color "#111215"
   $form.Controls.Add($header)
 
   if (Test-Path -LiteralPath $sourceLogo) {
@@ -156,15 +156,15 @@ function Show-SetupForm {
   $titleLabel.Location = New-Object System.Drawing.Point(112, 34)
   $titleLabel.Size = New-Object System.Drawing.Size(540, 34)
   $titleLabel.ForeColor = [System.Drawing.Color]::White
-  $titleLabel.BackColor = Get-Color "#18191c"
+  $titleLabel.BackColor = Get-Color "#111215"
   $titleLabel.Font = Get-UiFont 18 ([System.Drawing.FontStyle]::Bold)
   $header.Controls.Add($titleLabel)
 
   $subtitleLabel = New-Object System.Windows.Forms.Label
   $subtitleLabel.Location = New-Object System.Drawing.Point(115, 72)
   $subtitleLabel.Size = New-Object System.Drawing.Size(530, 40)
-  $subtitleLabel.ForeColor = Get-Color "#d7dae0"
-  $subtitleLabel.BackColor = Get-Color "#18191c"
+  $subtitleLabel.ForeColor = Get-Color "#a0a5b5"
+  $subtitleLabel.BackColor = Get-Color "#111215"
   $subtitleLabel.Font = Get-UiFont 10
   $header.Controls.Add($subtitleLabel)
 
@@ -172,12 +172,15 @@ function Show-SetupForm {
   $languageLabel.Location = New-Object System.Drawing.Point(42, 166)
   $languageLabel.Size = New-Object System.Drawing.Size(180, 24)
   $languageLabel.Font = Get-UiFont 10 ([System.Drawing.FontStyle]::Bold)
+  $languageLabel.BackColor = [System.Drawing.Color]::White
+  $languageLabel.ForeColor = Get-Color "#111215"
   $form.Controls.Add($languageLabel)
 
   $languageCombo = New-Object System.Windows.Forms.ComboBox
   $languageCombo.Location = New-Object System.Drawing.Point(42, 194)
   $languageCombo.Size = New-Object System.Drawing.Size(236, 28)
   $languageCombo.DropDownStyle = "DropDownList"
+  $languageCombo.FlatStyle = "Flat"
   [void]$languageCombo.Items.Add("Deutsch")
   [void]$languageCombo.Items.Add("English")
   $languageCombo.SelectedIndex = 0
@@ -187,27 +190,35 @@ function Show-SetupForm {
   $folderLabel.Location = New-Object System.Drawing.Point(42, 248)
   $folderLabel.Size = New-Object System.Drawing.Size(220, 24)
   $folderLabel.Font = Get-UiFont 10 ([System.Drawing.FontStyle]::Bold)
+  $folderLabel.BackColor = [System.Drawing.Color]::White
+  $folderLabel.ForeColor = Get-Color "#111215"
   $form.Controls.Add($folderLabel)
 
   $folderBox = New-Object System.Windows.Forms.TextBox
   $folderBox.Location = New-Object System.Drawing.Point(42, 278)
   $folderBox.Size = New-Object System.Drawing.Size(470, 28)
   $folderBox.Text = $defaultInstallDir
+  $folderBox.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
+  $folderBox.BackColor = Get-Color "#ffffff"
+  $folderBox.ForeColor = Get-Color "#111215"
   $form.Controls.Add($folderBox)
 
   $browseButton = New-Object System.Windows.Forms.Button
   $browseButton.Location = New-Object System.Drawing.Point(526, 276)
   $browseButton.Size = New-Object System.Drawing.Size(126, 32)
   $browseButton.FlatStyle = "Flat"
-  $browseButton.BackColor = [System.Drawing.Color]::White
-  $browseButton.ForeColor = Get-Color "#18191c"
+  $browseButton.FlatAppearance.BorderSize = 0
+  $browseButton.BackColor = Get-Color "#f1f1ed"
+  $browseButton.ForeColor = Get-Color "#111215"
   $browseButton.Font = Get-UiFont 9 ([System.Drawing.FontStyle]::Bold)
+  $browseButton.Cursor = [System.Windows.Forms.Cursors]::Hand
   $form.Controls.Add($browseButton)
 
   $folderHintLabel = New-Object System.Windows.Forms.Label
   $folderHintLabel.Location = New-Object System.Drawing.Point(42, 314)
   $folderHintLabel.Size = New-Object System.Drawing.Size(610, 34)
   $folderHintLabel.ForeColor = Get-Color "#71747c"
+  $folderHintLabel.BackColor = [System.Drawing.Color]::White
   $folderHintLabel.Font = Get-UiFont 8.5
   $form.Controls.Add($folderHintLabel)
 
@@ -215,6 +226,8 @@ function Show-SetupForm {
   $optionsLabel.Location = New-Object System.Drawing.Point(42, 368)
   $optionsLabel.Size = New-Object System.Drawing.Size(180, 24)
   $optionsLabel.Font = Get-UiFont 10 ([System.Drawing.FontStyle]::Bold)
+  $optionsLabel.BackColor = [System.Drawing.Color]::White
+  $optionsLabel.ForeColor = Get-Color "#111215"
   $form.Controls.Add($optionsLabel)
 
   $desktopCheck = New-Object System.Windows.Forms.CheckBox
@@ -222,7 +235,9 @@ function Show-SetupForm {
   $desktopCheck.Size = New-Object System.Drawing.Size(280, 28)
   $desktopCheck.Checked = $true
   $desktopCheck.Font = Get-UiFont 9.5
-  $desktopCheck.BackColor = Get-Color "#f7f7f5"
+  $desktopCheck.BackColor = [System.Drawing.Color]::White
+  $desktopCheck.ForeColor = Get-Color "#111215"
+  $desktopCheck.Cursor = [System.Windows.Forms.Cursors]::Hand
   $form.Controls.Add($desktopCheck)
 
   $startMenuCheck = New-Object System.Windows.Forms.CheckBox
@@ -230,7 +245,9 @@ function Show-SetupForm {
   $startMenuCheck.Size = New-Object System.Drawing.Size(292, 28)
   $startMenuCheck.Checked = $true
   $startMenuCheck.Font = Get-UiFont 9.5
-  $startMenuCheck.BackColor = Get-Color "#f7f7f5"
+  $startMenuCheck.BackColor = [System.Drawing.Color]::White
+  $startMenuCheck.ForeColor = Get-Color "#111215"
+  $startMenuCheck.Cursor = [System.Windows.Forms.Cursors]::Hand
   $form.Controls.Add($startMenuCheck)
 
   $launchCheck = New-Object System.Windows.Forms.CheckBox
@@ -238,25 +255,31 @@ function Show-SetupForm {
   $launchCheck.Size = New-Object System.Drawing.Size(320, 28)
   $launchCheck.Checked = $true
   $launchCheck.Font = Get-UiFont 9.5
-  $launchCheck.BackColor = Get-Color "#f7f7f5"
+  $launchCheck.BackColor = [System.Drawing.Color]::White
+  $launchCheck.ForeColor = Get-Color "#111215"
+  $launchCheck.Cursor = [System.Windows.Forms.Cursors]::Hand
   $form.Controls.Add($launchCheck)
 
   $installButton = New-Object System.Windows.Forms.Button
   $installButton.Location = New-Object System.Drawing.Point(458, 498)
   $installButton.Size = New-Object System.Drawing.Size(194, 40)
   $installButton.FlatStyle = "Flat"
-  $installButton.BackColor = Get-Color "#18191c"
+  $installButton.FlatAppearance.BorderSize = 0
+  $installButton.BackColor = Get-Color "#3b52e2"
   $installButton.ForeColor = [System.Drawing.Color]::White
   $installButton.Font = Get-UiFont 10 ([System.Drawing.FontStyle]::Bold)
+  $installButton.Cursor = [System.Windows.Forms.Cursors]::Hand
   $form.Controls.Add($installButton)
 
   $cancelButton = New-Object System.Windows.Forms.Button
   $cancelButton.Location = New-Object System.Drawing.Point(326, 498)
   $cancelButton.Size = New-Object System.Drawing.Size(116, 40)
   $cancelButton.FlatStyle = "Flat"
-  $cancelButton.BackColor = [System.Drawing.Color]::White
-  $cancelButton.ForeColor = Get-Color "#18191c"
+  $cancelButton.FlatAppearance.BorderSize = 0
+  $cancelButton.BackColor = Get-Color "#f1f1ed"
+  $cancelButton.ForeColor = Get-Color "#111215"
   $cancelButton.Font = Get-UiFont 9 ([System.Drawing.FontStyle]::Bold)
+  $cancelButton.Cursor = [System.Windows.Forms.Cursors]::Hand
   $form.Controls.Add($cancelButton)
 
   function Apply-SetupLanguage {
@@ -364,7 +387,7 @@ function New-ProgressWindow {
   $form.MaximizeBox = $false
   $form.MinimizeBox = $false
   $form.ClientSize = New-Object System.Drawing.Size(560, 255)
-  $form.BackColor = Get-Color "#f7f7f5"
+  $form.BackColor = Get-Color "#ffffff"
   $form.Font = Get-UiFont 9
 
   if (Test-Path -LiteralPath $sourceExe) {
@@ -375,6 +398,8 @@ function New-ProgressWindow {
   $title.Location = New-Object System.Drawing.Point(36, 34)
   $title.Size = New-Object System.Drawing.Size(490, 36)
   $title.Font = Get-UiFont 17 ([System.Drawing.FontStyle]::Bold)
+  $title.ForeColor = Get-Color "#3b52e2"
+  $title.BackColor = [System.Drawing.Color]::White
   $title.Text = $Text.ProgressTitle
   $form.Controls.Add($title)
 
@@ -383,6 +408,7 @@ function New-ProgressWindow {
   $subtitle.Size = New-Object System.Drawing.Size(490, 28)
   $subtitle.Font = Get-UiFont 10
   $subtitle.ForeColor = Get-Color "#71747c"
+  $subtitle.BackColor = [System.Drawing.Color]::White
   $subtitle.Text = $Text.ProgressSubtitle
   $form.Controls.Add($subtitle)
 
@@ -391,6 +417,7 @@ function New-ProgressWindow {
   $status.Size = New-Object System.Drawing.Size(490, 26)
   $status.Font = Get-UiFont 9.5
   $status.ForeColor = Get-Color "#3c3f46"
+  $status.BackColor = [System.Drawing.Color]::White
   $form.Controls.Add($status)
 
   $bar = New-Object System.Windows.Forms.ProgressBar
