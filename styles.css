@@ -288,8 +288,8 @@ a {
 }
 .app-mockup {
   background: var(--bg-card);
-  border-radius: var(--radius);
-  border: 1px solid var(--line-strong);
+  border-radius: 12px; /* Apple Window corner radius */
+  border: 1px solid rgba(0, 0, 0, 0.1);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   text-align: left;
@@ -300,53 +300,64 @@ a {
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s ease;
   transform: translateY(0) rotateX(1.5deg);
 }
+html[data-theme="dark"] .app-mockup {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
 .app-mockup:hover {
   transform: translateY(-8px) rotateX(0deg);
-  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.16);
 }
 html[data-theme="dark"] .app-mockup:hover {
   box-shadow: 0 28px 60px rgba(0, 0, 0, 0.5);
 }
 
-/* Titlebar */
+/* Titlebar (macOS Style) */
 .mockup-header {
-  height: 38px;
+  position: relative;
+  height: 40px; /* macOS title bar height */
   background: var(--bg-alt);
   border-bottom: 1px solid var(--line);
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 0 16px;
   user-select: none;
 }
 .mockup-controls {
   display: flex;
-  gap: 7px;
-  width: 60px;
+  gap: 8px;
+  z-index: 2;
 }
 .control-dot {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: var(--line-strong);
+  transition: opacity 0.2s ease;
 }
-.app-mockup:hover .dot-close { background: #ff5f56; }
-.app-mockup:hover .dot-min { background: #ffbd2e; }
-.app-mockup:hover .dot-max { background: #27c93f; }
+.dot-close { background: #ff5f56 !important; border: 0.5px solid rgba(0,0,0,0.12); }
+.dot-min { background: #ffbd2e !important; border: 0.5px solid rgba(0,0,0,0.12); }
+.dot-max { background: #27c93f !important; border: 0.5px solid rgba(0,0,0,0.12); }
+
+.mockup-header:hover .control-dot {
+  opacity: 0.85;
+}
 
 .mockup-title {
-  font-size: 0.78rem;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.82rem;
   font-weight: 600;
-  color: var(--muted);
+  color: var(--ink);
   display: flex;
   align-items: center;
   gap: 6px;
+  z-index: 1;
 }
 .mockup-title img {
-  opacity: 0.8;
+  opacity: 0.9;
 }
 .mockup-actions {
-  width: 60px;
+  display: none;
 }
 
 /* App Body Layout */
@@ -356,15 +367,20 @@ html[data-theme="dark"] .app-mockup:hover {
   overflow: hidden;
 }
 
-/* Sidebar */
+/* Sidebar (macOS Glassmorphism) */
 .mockup-sidebar {
   width: 210px;
-  background: var(--bg-alt);
+  background: rgba(241, 241, 237, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid var(--line);
-  padding: 16px;
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+html[data-theme="dark"] .mockup-sidebar {
+  background: rgba(18, 19, 23, 0.45);
 }
 .sidebar-user {
   display: flex;
@@ -394,50 +410,46 @@ html[data-theme="dark"] .app-mockup:hover {
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
   flex: 1;
 }
 .nav-item {
   background: none;
   border: none;
   text-align: left;
-  padding: 10px 14px;
-  font-size: 0.82rem;
-  font-weight: 600;
+  padding: 8px 12px;
+  font-size: 0.84rem;
+  font-weight: 500;
   color: var(--ink-soft);
-  border-radius: var(--radius-sm);
+  border-radius: 8px; /* macOS style soft corners */
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 10px;
-  transition: var(--transition);
+  transition: background-color 0.2s ease, color 0.2s ease;
   font-family: inherit;
-  border-left: 3px solid transparent;
 }
 .nav-item svg {
   width: 16px;
   height: 16px;
-  opacity: 0.65;
-  transition: var(--transition);
+  opacity: 0.75;
+  transition: color 0.2s ease;
 }
 .nav-item:hover {
-  background: rgba(0, 0, 0, 0.02);
+  background: rgba(0, 0, 0, 0.05);
   color: var(--ink);
 }
 html[data-theme="dark"] .nav-item:hover {
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(255, 255, 255, 0.05);
 }
 .nav-item.active {
-  background: var(--accent-soft);
-  color: var(--accent);
-  border-left-color: var(--accent);
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
+  background: var(--accent) !important; /* macOS Active Accent Blue/Indigo */
+  color: #ffffff !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 .nav-item.active svg {
-  color: var(--accent);
+  color: #ffffff !important;
   opacity: 1;
-  transform: scale(1.05);
 }
 .sidebar-xp {
   margin-top: auto;
@@ -516,21 +528,20 @@ html[data-theme="dark"] .nav-item:hover {
   color: var(--muted);
 }
 .input-group input {
-  padding: 10px 0;
-  border: none;
-  border-bottom: 2px solid var(--line-strong);
-  border-radius: 0;
-  background: transparent;
+  padding: 8px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--bg-alt);
   color: var(--ink);
   outline: none;
   font-family: inherit;
-  font-size: 0.94rem;
-  font-weight: 600;
-  transition: border-color 0.3s ease;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .input-group input:focus {
   border-color: var(--accent);
-  box-shadow: none;
+  box-shadow: 0 0 0 3px var(--accent-glow);
 }
 .checklist-box {
   background: var(--bg-alt);
