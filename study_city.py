@@ -661,6 +661,7 @@ class StudyCityApp:
         if not self.root.winfo_exists():
             return
         toast = tk.Toplevel(self.root)
+        toast.is_toast = True
         toast.overrideredirect(True)
         toast.attributes("-topmost", True)
         toast.configure(bg=COLORS["navy"])
@@ -4699,6 +4700,19 @@ class StudyCityApp:
         self._render_all()
 
     def _update_widget_colors(self, widget) -> None:
+        # Safety check: bypass updating colors for toast notifications or their children
+        try:
+            w = widget
+            while w:
+                if getattr(w, "is_toast", False):
+                    return
+                parent_name = w.winfo_parent()
+                if not parent_name:
+                    break
+                w = widget.nametowidget(parent_name)
+        except Exception:
+            pass
+
         try:
             w_class = widget.winfo_class()
         except Exception:
