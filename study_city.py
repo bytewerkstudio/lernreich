@@ -884,23 +884,20 @@ class StudyCityApp:
             ("notes", "📝  Lernjournal"),
         ]
         for idx, (view_id, label) in enumerate(nav_items):
-            btn = tk.Button(
+            btn = ModernButton(
                 self.nav_frame,
                 text=label,
                 font=("Segoe UI", 10, "normal"),
-                anchor="w",
-                padx=16,
-                pady=10,
                 bg=COLORS["paper_dark"],
                 fg=COLORS["muted"],
-                relief="flat",
-                bd=0,
-                cursor="hand2",
-                activebackground="#eef0fe",
-                activeforeground="#3b52e2"
+                active_bg="#eef0fe" if self.theme_mode.get() == "light" else "#202444",
+                active_fg="#3b52e2" if self.theme_mode.get() == "light" else "#5c6fff",
+                radius=10,
+                width=206,
+                height=38,
+                command=lambda v=view_id: self.switch_view(v)
             )
             btn.pack(fill="x", pady=3)
-            btn.configure(command=lambda v=view_id: self.switch_view(v))
             self.nav_buttons[view_id] = btn
 
         # Bottom XP Progress Area
@@ -1020,11 +1017,22 @@ class StudyCityApp:
 
     def _update_sidebar_nav(self) -> None:
         view = self.current_view.get()
+        is_light = (self.theme_mode.get() == "light")
         for key, btn in self.nav_buttons.items():
             if key == view:
-                btn.configure(bg="#eef0fe", fg="#3b52e2", font=("Segoe UI", 10, "bold"))
+                active_bg = "#eef0fe" if is_light else "#202444"
+                active_fg = "#3b52e2" if is_light else "#5c6fff"
+                btn.configure_button(
+                    bg=active_bg,
+                    fg=active_fg,
+                    font=("Segoe UI", 10, "bold")
+                )
             else:
-                btn.configure(bg=COLORS["paper_dark"], fg=COLORS["muted"], font=("Segoe UI", 10, "normal"))
+                btn.configure_button(
+                    bg=COLORS["paper_dark"],
+                    fg=COLORS["muted"],
+                    font=("Segoe UI", 10, "normal")
+                )
 
     def _build_native_menus(self) -> None:
         self.menu_bar = tk.Menu(self.root)
@@ -1271,24 +1279,29 @@ class StudyCityApp:
 
         for idx, item in enumerate(FOCUS_CHECKLIST_ITEMS):
             var = tk.BooleanVar(value=False)
-            chk = tk.Checkbutton(
-                grid_frame,
-                text=item,
-                variable=var,
-                command=self._on_checklist_changed,
-                bg=COLORS["paper_dark"],
-                activebackground=COLORS["paper_dark"],
-                selectcolor=COLORS["cream"],
-                fg=COLORS["ink"],
-                activeforeground=COLORS["ink"],
-                font=("Segoe UI", 9),
-                bd=0,
-                relief="flat",
-                cursor="hand2"
-            )
+            
+            # Create a small horizontal container for switch + label
+            item_frame = tk.Frame(grid_frame, bg=COLORS["paper_dark"])
             r_idx = idx // 2
             c_idx = idx % 2
-            chk.grid(row=r_idx, column=c_idx, sticky="w", pady=1, padx=4)
+            item_frame.grid(row=r_idx, column=c_idx, sticky="w", pady=3, padx=6)
+            
+            # iOS-style switch
+            switch = IosSwitch(item_frame, variable=var, command=self._on_checklist_changed)
+            switch.pack(side="left", padx=(0, 8))
+            
+            # Text label
+            lbl = tk.Label(
+                item_frame,
+                text=item,
+                font=("Segoe UI", 9, "semibold" if self.theme_mode.get() == "light" else "normal"),
+                fg=COLORS["ink"],
+                bg=COLORS["paper_dark"],
+                cursor="hand2"
+            )
+            lbl.pack(side="left")
+            lbl.bind("<Button-1>", lambda e, v=var: v.set(not v.get()))
+            
             self.checklist_vars.append(var)
 
         # Setup buttons action frame
@@ -1296,36 +1309,33 @@ class StudyCityApp:
         setup_buttons.pack(fill="x", pady=(8, 2))
         setup_buttons.columnconfigure((0, 1), weight=1)
 
-        self.start_timer_btn = tk.Button(
+        self.start_timer_btn = ModernButton(
             setup_buttons,
             text="⏱  Fokus starten",
             font=("Segoe UI", 10, "bold"),
             bg=COLORS["navy"],
             fg=COLORS["cream"],
-            activebackground=COLORS["navy_light"],
-            activeforeground="#ffffff",
-            relief="flat",
-            bd=0,
-            cursor="hand2",
-            state="normal",
-            command=self.start_new_session_action,
-            pady=8
+            active_bg=COLORS["navy_light"],
+            active_fg="#ffffff",
+            radius=12,
+            width=210,
+            height=40,
+            command=self.start_new_session_action
         )
         self.start_timer_btn.grid(row=0, column=0, sticky="ew", padx=(0, 6))
 
-        self.resume_timer_btn = tk.Button(
+        self.resume_timer_btn = ModernButton(
             setup_buttons,
             text="🔄  Sitzung fortsetzen",
             font=("Segoe UI", 10, "bold"),
             bg=COLORS["paper_dark"],
             fg=COLORS["ink"],
-            activebackground=COLORS["line"],
-            activeforeground=COLORS["ink"],
-            relief="flat",
-            bd=0,
-            cursor="hand2",
-            command=self.resume_session_action,
-            pady=8
+            active_bg=COLORS["line"],
+            active_fg=COLORS["ink"],
+            radius=12,
+            width=210,
+            height=40,
+            command=self.resume_session_action
         )
         self.resume_timer_btn.grid(row=0, column=1, sticky="ew", padx=(6, 0))
 
@@ -1393,35 +1403,33 @@ class StudyCityApp:
         buttons.grid(row=5, column=0, sticky="ew", pady=3)
         buttons.grid_columnconfigure((0, 1), weight=1)
         
-        self.start_button = tk.Button(
+        self.start_button = ModernButton(
             buttons,
             text=self.t("start"),
             font=("Segoe UI", 10, "bold"),
             bg=COLORS["navy"],
             fg=COLORS["cream"],
-            activebackground=COLORS["navy_light"],
-            activeforeground="#ffffff",
-            relief="flat",
-            bd=0,
-            cursor="hand2",
-            command=self.toggle_running,
-            pady=8
+            active_bg=COLORS["navy_light"],
+            active_fg="#ffffff",
+            radius=12,
+            width=210,
+            height=40,
+            command=self.toggle_running
         )
         self.start_button.grid(row=0, column=0, sticky="ew", padx=(0, 6))
         
-        self.abort_button = tk.Button(
+        self.abort_button = ModernButton(
             buttons,
             text=self.t("aware_abort"),
             font=("Segoe UI", 10),
             bg=COLORS["paper_dark"],
             fg=COLORS["ink"],
-            activebackground=COLORS["line"],
-            activeforeground=COLORS["ink"],
-            relief="flat",
-            bd=0,
-            cursor="hand2",
-            command=self.request_abort_session,
-            pady=8
+            active_bg=COLORS["line"],
+            active_fg=COLORS["ink"],
+            radius=12,
+            width=210,
+            height=40,
+            command=self.request_abort_session
         )
         self.abort_button.grid(row=0, column=1, sticky="ew", padx=(6, 0))
 
@@ -1429,19 +1437,18 @@ class StudyCityApp:
         bottom.grid(row=6, column=0, sticky="ew", pady=(3, 3))
         bottom.grid_columnconfigure(0, weight=1)
         
-        self.break_button = tk.Button(
+        self.break_button = ModernButton(
             bottom,
             text=self.t("break_after_focus"),
             font=("Segoe UI", 10),
             bg=COLORS["paper_dark"],
             fg=COLORS["ink"],
-            activebackground=COLORS["line"],
-            activeforeground=COLORS["ink"],
-            relief="flat",
-            bd=0,
-            cursor="hand2",
-            command=self.toggle_break,
-            pady=8
+            active_bg=COLORS["line"],
+            active_fg=COLORS["ink"],
+            radius=12,
+            width=420,
+            height=40,
+            command=self.toggle_break
         )
         self.break_button.grid(row=0, column=0, sticky="ew")
 
@@ -1489,25 +1496,45 @@ class StudyCityApp:
 
         view_switch = ttk.Frame(top, style="Panel.TFrame")
         view_switch.grid(row=0, column=1, rowspan=2, sticky="e", padx=(12, 0))
-        self.tal_button = ttk.Button(
+        self.tal_button = ModernButton(
             view_switch,
             text=self.t("avalon_tab"),
-            style="Primary.TButton",
-            command=lambda: self.switch_view("stats"),
+            font=("Segoe UI", 9, "bold"),
+            bg=COLORS["navy"],
+            fg=COLORS["cream"],
+            active_bg=COLORS["navy_light"],
+            radius=10,
+            width=90,
+            height=32,
+            command=lambda: self.switch_view("stats")
         )
         self.tal_button.grid(row=0, column=0, padx=(0, 6))
-        self.calendar_button = ttk.Button(
+
+        self.calendar_button = ModernButton(
             view_switch,
             text=self.t("calendar"),
-            style="Secondary.TButton",
-            command=lambda: self.switch_view("calendar"),
+            font=("Segoe UI", 9),
+            bg=COLORS["paper_dark"],
+            fg=COLORS["ink"],
+            active_bg=COLORS["line"],
+            radius=10,
+            width=100,
+            height=32,
+            command=lambda: self.switch_view("calendar")
         )
         self.calendar_button.grid(row=0, column=1, padx=(0, 6))
-        self.notes_button = ttk.Button(
+
+        self.notes_button = ModernButton(
             view_switch,
             text=self.t("notes_tab"),
-            style="Secondary.TButton",
-            command=lambda: self.switch_view("notes"),
+            font=("Segoe UI", 9),
+            bg=COLORS["paper_dark"],
+            fg=COLORS["ink"],
+            active_bg=COLORS["line"],
+            radius=10,
+            width=100,
+            height=32,
+            command=lambda: self.switch_view("notes")
         )
         self.notes_button.grid(row=0, column=2)
 
@@ -1516,46 +1543,88 @@ class StudyCityApp:
         stats_wrap.grid_columnconfigure(0, weight=1)
         self.focus_summary_label = ttk.Label(stats_wrap, text="", style="Muted.TLabel")
         self.focus_summary_label.grid(row=0, column=0, sticky="w")
-        self.prev_month_button = ttk.Button(
+
+        self.prev_month_button = ModernButton(
             stats_wrap,
             text="<",
-            style="Secondary.TButton",
-            command=lambda: self.shift_calendar_month(-1),
+            font=("Segoe UI", 9, "bold"),
+            bg=COLORS["paper_dark"],
+            fg=COLORS["ink"],
+            active_bg=COLORS["line"],
+            radius=8,
+            width=32,
+            height=30,
+            command=lambda: self.shift_calendar_month(-1)
         )
         self.prev_month_button.grid(row=0, column=1, padx=(12, 4))
-        self.next_month_button = ttk.Button(
+
+        self.next_month_button = ModernButton(
             stats_wrap,
             text=">",
-            style="Secondary.TButton",
-            command=lambda: self.shift_calendar_month(1),
+            font=("Segoe UI", 9, "bold"),
+            bg=COLORS["paper_dark"],
+            fg=COLORS["ink"],
+            active_bg=COLORS["line"],
+            radius=8,
+            width=32,
+            height=30,
+            command=lambda: self.shift_calendar_month(1)
         )
         self.next_month_button.grid(row=0, column=2)
-        self.open_notes_button = ttk.Button(
+
+        self.open_notes_button = ModernButton(
             stats_wrap,
             text=self.t("open_notes_folder"),
-            style="Secondary.TButton",
-            command=self.open_notes_folder,
+            font=("Segoe UI", 9),
+            bg=COLORS["paper_dark"],
+            fg=COLORS["ink"],
+            active_bg=COLORS["line"],
+            radius=8,
+            width=120,
+            height=30,
+            command=self.open_notes_folder
         )
         self.open_notes_button.grid(row=0, column=3, padx=(10, 0))
-        self.daily_plan_button = ttk.Button(
+
+        self.daily_plan_button = ModernButton(
             stats_wrap,
             text=self.t("daily_plan"),
-            style="Secondary.TButton",
-            command=self.open_daily_plan,
+            font=("Segoe UI", 9),
+            bg=COLORS["paper_dark"],
+            fg=COLORS["ink"],
+            active_bg=COLORS["line"],
+            radius=8,
+            width=110,
+            height=30,
+            command=self.open_daily_plan
         )
         self.daily_plan_button.grid(row=0, column=4, padx=(10, 0))
-        self.week_report_button = ttk.Button(
+
+        self.week_report_button = ModernButton(
             stats_wrap,
             text=self.t("week_report"),
-            style="Secondary.TButton",
-            command=self.open_week_report,
+            font=("Segoe UI", 9),
+            bg=COLORS["paper_dark"],
+            fg=COLORS["ink"],
+            active_bg=COLORS["line"],
+            radius=8,
+            width=110,
+            height=30,
+            command=self.open_week_report
         )
         self.week_report_button.grid(row=0, column=5, padx=(8, 0))
-        self.review_button = ttk.Button(
+
+        self.review_button = ModernButton(
             stats_wrap,
             text=self.t("reviews"),
-            style="Secondary.TButton",
-            command=self.open_review_reminders,
+            font=("Segoe UI", 9),
+            bg=COLORS["paper_dark"],
+            fg=COLORS["ink"],
+            active_bg=COLORS["line"],
+            radius=8,
+            width=100,
+            height=30,
+            command=self.open_review_reminders
         )
         self.review_button.grid(row=0, column=6, padx=(8, 0))
 
@@ -2613,7 +2682,7 @@ class StudyCityApp:
             for var in self.checklist_vars:
                 var.set(False)
         if hasattr(self, "start_timer_btn"):
-            self.start_timer_btn.configure(state="disabled", bg=COLORS["line"], fg=COLORS["muted"])
+            self.start_timer_btn.set_state("disabled")
 
         now = datetime.now()
         self.running = True
@@ -2639,7 +2708,7 @@ class StudyCityApp:
             self.status_text.set("Noch zu kurz fuer eine gespeicherte Session.")
             return
         self.running = False
-        self.start_button.configure(text=self.t("start"))
+        self.start_button.configure_button(text=self.t("start"))
         completed_seconds = int(self.session_seconds)
         streak_bonus = self._commit_session()
         mins = self.break_duration_minutes.get()
@@ -2682,7 +2751,7 @@ class StudyCityApp:
         self._reminder_checkpoint = 0
         self._save_checkpoint = 0
         self._clear_learning_note()
-        self.start_button.configure(text=self.t("start"))
+        self.start_button.configure_button(text=self.t("start"))
 
     def toggle_break(self) -> None:
         if self.running:
@@ -3004,7 +3073,7 @@ class StudyCityApp:
         }
         self._clear_learning_note()
         save_progress(self.data)
-        self.start_button.configure(text=self.t("start"))
+        self.start_button.configure_button(text=self.t("start"))
         self.status_text.set("Alles zurueckgesetzt. Lernreich wartet neu.")
         if parent is not None:
             parent.destroy()
@@ -3085,21 +3154,43 @@ class StudyCityApp:
 
     def _refresh_view_buttons(self) -> None:
         view = self.current_view.get()
-        self.tal_button.configure(style="Primary.TButton" if view == "stats" else "Secondary.TButton")
-        self.calendar_button.configure(style="Primary.TButton" if view == "calendar" else "Secondary.TButton")
-        self.notes_button.configure(style="Primary.TButton" if view == "notes" else "Secondary.TButton")
+        is_light = (self.theme_mode.get() == "light")
+        active_bg = COLORS["navy"]
+        active_fg = COLORS["cream"]
+        active_act_bg = COLORS["navy_light"]
+        
+        inactive_bg = COLORS["paper_dark"]
+        inactive_fg = COLORS["ink"]
+        inactive_act_bg = COLORS["line"]
+        
+        if view == "stats":
+            self.tal_button.configure_button(bg=active_bg, fg=active_fg, active_bg=active_act_bg, font=("Segoe UI", 9, "bold"))
+            self.calendar_button.configure_button(bg=inactive_bg, fg=inactive_fg, active_bg=inactive_act_bg, font=("Segoe UI", 9, "normal"))
+            self.notes_button.configure_button(bg=inactive_bg, fg=inactive_fg, active_bg=inactive_act_bg, font=("Segoe UI", 9, "normal"))
+        elif view == "calendar":
+            self.tal_button.configure_button(bg=inactive_bg, fg=inactive_fg, active_bg=inactive_act_bg, font=("Segoe UI", 9, "normal"))
+            self.calendar_button.configure_button(bg=active_bg, fg=active_fg, active_bg=active_act_bg, font=("Segoe UI", 9, "bold"))
+            self.notes_button.configure_button(bg=inactive_bg, fg=inactive_fg, active_bg=inactive_act_bg, font=("Segoe UI", 9, "normal"))
+        elif view == "notes":
+            self.tal_button.configure_button(bg=inactive_bg, fg=inactive_fg, active_bg=inactive_act_bg, font=("Segoe UI", 9, "normal"))
+            self.calendar_button.configure_button(bg=inactive_bg, fg=inactive_fg, active_bg=inactive_act_bg, font=("Segoe UI", 9, "normal"))
+            self.notes_button.configure_button(bg=active_bg, fg=active_fg, active_bg=active_act_bg, font=("Segoe UI", 9, "bold"))
+            
         month_state = "normal" if view == "calendar" else "disabled"
-        self.prev_month_button.configure(state=month_state)
-        self.next_month_button.configure(state=month_state)
+        self.prev_month_button.set_state(month_state)
+        self.next_month_button.set_state(month_state)
 
     def _refresh_break_button(self) -> None:
         if self.break_running:
             left = max(0, int(self.break_limit_seconds - self.break_seconds))
-            self.break_button.configure(text=f"Pause {format_seconds(left)}", state="disabled", bg=COLORS["paper_dark"], fg=COLORS["muted"])
+            self.break_button.set_state("disabled")
+            self.break_button.configure_button(text=f"Pause {format_seconds(left)}", bg=COLORS["paper_dark"], fg=COLORS["muted"])
         elif self.break_available:
-            self.break_button.configure(text=f"Pause starten (+{self.break_bonus_xp} XP)", state="normal", bg=COLORS["navy"], fg=COLORS["cream"])
+            self.break_button.set_state("normal")
+            self.break_button.configure_button(text=f"Pause starten (+{self.break_bonus_xp} XP)", bg=COLORS["navy"], fg=COLORS["cream"])
         else:
-            self.break_button.configure(text=self.t("break_after_focus"), state="disabled", bg=COLORS["paper_dark"], fg=COLORS["muted"])
+            self.break_button.set_state("disabled")
+            self.break_button.configure_button(text=self.t("break_after_focus"), bg=COLORS["paper_dark"], fg=COLORS["muted"])
 
     def _tick(self) -> None:
         now = datetime.now()
@@ -3426,19 +3517,20 @@ class StudyCityApp:
             return
         if self.running:
             if self._has_reached_target():
-                self.start_button.configure(text=self.t("finish_goal"), bg=COLORS["success"], fg=COLORS["cream"])
+                self.start_button.configure_button(text=self.t("finish_goal"), bg=COLORS["success"], fg=COLORS["cream"])
                 if hasattr(self, "abort_button"):
-                    self.abort_button.configure(text=self.t("finish_goal"), bg=COLORS["success"], fg=COLORS["cream"])
+                    self.abort_button.configure_button(text=self.t("finish_goal"), bg=COLORS["success"], fg=COLORS["cream"])
             else:
-                self.start_button.configure(text=self.t("running"), bg=COLORS["navy"], fg=COLORS["cream"])
+                self.start_button.configure_button(text=self.t("running"), bg=COLORS["navy"], fg=COLORS["cream"])
                 if hasattr(self, "abort_button"):
-                    self.abort_button.configure(text=self.t("aware_abort"), bg=COLORS["paper_dark"], fg=COLORS["ink"])
+                    self.abort_button.configure_button(text=self.t("aware_abort"), bg=COLORS["paper_dark"], fg=COLORS["ink"])
         else:
-            self.start_button.configure(text=self.t("start"), bg=COLORS["navy"], fg=COLORS["cream"])
+            self.start_button.configure_button(text=self.t("start"), bg=COLORS["navy"], fg=COLORS["cream"])
             if hasattr(self, "abort_button"):
-                self.abort_button.configure(text=self.t("aware_abort"), bg=COLORS["paper_dark"], fg=COLORS["ink"])
+                self.abort_button.configure_button(text=self.t("aware_abort"), bg=COLORS["paper_dark"], fg=COLORS["ink"])
             if hasattr(self, "start_timer_btn"):
-                self.start_timer_btn.configure(state="normal", bg=COLORS["navy"], fg=COLORS["cream"])
+                self.start_timer_btn.set_state("normal")
+                self.start_timer_btn.configure_button(bg=COLORS["navy"], fg=COLORS["cream"])
         
         # Dual-action buttons: show resume button dynamically if there is a leftover session
         if hasattr(self, "resume_timer_btn") and hasattr(self, "start_timer_btn"):
@@ -3446,7 +3538,7 @@ class StudyCityApp:
                 self.resume_timer_btn.grid(row=0, column=1, sticky="ew", padx=(6, 0))
                 self.start_timer_btn.grid(row=0, column=0, sticky="ew", padx=(0, 6), columnspan=1)
                 formatted_time = format_seconds(self.session_seconds)
-                self.resume_timer_btn.configure(text=f"🔄  Sitzung fortsetzen ({formatted_time})")
+                self.resume_timer_btn.configure_button(text=f"🔄  Sitzung fortsetzen ({formatted_time})")
             else:
                 self.resume_timer_btn.grid_remove()
                 self.start_timer_btn.grid(row=0, column=0, sticky="ew", padx=0, columnspan=2)
@@ -4964,6 +5056,42 @@ class StudyCityApp:
             widget.draw_safe()
             return
 
+        if isinstance(widget, ModernButton):
+            curr_bg = widget.base_bg
+            is_light = (self.theme_mode.get() == "light")
+            if curr_bg in (LIGHT_COLORS["navy"], DARK_COLORS["navy"]):
+                widget.base_bg = COLORS["navy"]
+                widget.base_fg = COLORS["cream"]
+                widget.active_bg = COLORS["navy_light"]
+            elif curr_bg in (LIGHT_COLORS["paper_dark"], DARK_COLORS["paper_dark"]):
+                # Sidebar navigation buttons or secondary UI buttons
+                widget.base_bg = COLORS["paper_dark"]
+                if widget.base_fg in (LIGHT_COLORS["muted"], DARK_COLORS["muted"]):
+                    widget.base_fg = COLORS["muted"]
+                    widget.active_bg = "#eef0fe" if is_light else "#202444"
+                    widget.active_fg = "#3b52e2" if is_light else "#5c6fff"
+                else:
+                    widget.base_fg = COLORS["ink"]
+                    widget.active_bg = COLORS["line"]
+                    widget.active_fg = COLORS["ink"]
+            elif curr_bg in (LIGHT_COLORS["danger"], DARK_COLORS["danger"], "#dc2626", "#ef4444"):
+                widget.base_bg = COLORS["danger"]
+                widget.active_bg = "#b91c1c" if is_light else "#f87171"
+            elif curr_bg in (LIGHT_COLORS["success"], DARK_COLORS["success"], "#16a34a", "#22c55e"):
+                widget.base_bg = COLORS["success"]
+                widget.active_bg = "#15803d" if is_light else "#4ade80"
+            else:
+                widget.base_bg = COLORS["paper_dark"]
+                widget.base_fg = COLORS["ink"]
+                widget.active_bg = COLORS["line"]
+                widget.active_fg = COLORS["ink"]
+            widget.draw()
+            return
+
+        if isinstance(widget, IosSwitch):
+            widget.draw()
+            return
+
         if isinstance(widget, RoundedPanel):
             bg = COLORS["paper"]
             fill = COLORS["cream"]
@@ -5318,5 +5446,225 @@ class ModernSlider(tk.Canvas):
             self.command(str(val))
 
 
+class ModernButton(tk.Canvas):
+    def __init__(self, master, text, command=None, bg=None, fg=None, active_bg=None, active_fg=None, font=("Segoe UI", 10, "bold"), radius=10, width=180, height=38, **kwargs):
+        self.text = text
+        self.command = command
+        self.base_bg = bg
+        self.base_fg = fg
+        self.active_bg = active_bg
+        self.active_fg = active_fg
+        self.font = font
+        self.radius = radius
+        self.width = width
+        self.height = height
+        
+        self.hovered = False
+        self.disabled = False
+        
+        super().__init__(master, width=self.width, height=self.height, bd=0, highlightthickness=0, cursor="hand2", **kwargs)
+        
+        self.bind("<Button-1>", self._on_click)
+        self.bind("<Enter>", self._on_enter)
+        self.bind("<Leave>", self._on_leave)
+        self.bind("<Configure>", lambda e: self.draw())
+        
+        self.draw()
+
+    def set_state(self, state):
+        if state == "disabled":
+            self.disabled = True
+            self.configure(cursor="")
+        else:
+            self.disabled = False
+            self.configure(cursor="hand2")
+        self.draw()
+
+    def configure_button(self, text=None, bg=None, fg=None, font=None):
+        if text is not None:
+            self.text = text
+        if bg is not None:
+            self.base_bg = bg
+        if fg is not None:
+            self.base_fg = fg
+        if font is not None:
+            self.font = font
+        self.draw()
+
+    def _on_enter(self, event):
+        if not self.disabled:
+            self.hovered = True
+            self.draw()
+
+    def _on_leave(self, event):
+        if not self.disabled:
+            self.hovered = False
+            self.draw()
+
+    def _on_click(self, event):
+        if not self.disabled and self.command:
+            self.command()
+
+    def draw(self):
+        self.delete("all")
+        
+        ww = self.winfo_width()
+        hh = self.winfo_height()
+        w = self.width if ww <= 1 else ww
+        h = self.height if hh <= 1 else hh
+        
+        # Decide colors dynamically from app COLORS if none are provided
+        bg = self.base_bg if self.base_bg else COLORS["navy"]
+        fg = self.base_fg if self.base_fg else COLORS["cream"]
+        act_bg = self.active_bg if self.active_bg else COLORS["navy_light"]
+        act_fg = self.active_fg if self.active_fg else fg
+        
+        if self.disabled:
+            bg_fill = COLORS["line"]
+            text_fill = COLORS["muted"]
+        else:
+            bg_fill = act_bg if self.hovered else bg
+            text_fill = act_fg if self.hovered else fg
+            
+        # Draw rounded rectangle polygon
+        r = self.radius
+        points = [
+            r, 0,
+            w - r, 0,
+            w, 0,
+            w, r,
+            w, h - r,
+            w, h,
+            w - r, h,
+            r, h,
+            0, h,
+            0, h - r,
+            0, r,
+            0, 0
+        ]
+        
+        # Draw background container bg to avoid sharp edges matching master bg
+        parent_bg = self.master.cget("bg")
+        self.configure(bg=parent_bg)
+        
+        self.create_polygon(points, smooth=True, fill=bg_fill, outline="", width=0)
+        self.create_text(w / 2, h / 2, text=self.text, font=self.font, fill=text_fill, justify="center")
+
+
+class IosSwitch(tk.Canvas):
+    def __init__(self, master, variable, command=None, width=44, height=24, **kwargs):
+        self.variable = variable
+        self.command = command
+        self.width = width
+        self.height = height
+        self.radius = height / 2
+        
+        # Target position of handle (x-coordinate):
+        # 0 = False/Off, 1 = True/On
+        self.current_pos = 1.0 if self.variable.get() else 0.0
+        self.animating = False
+        
+        super().__init__(master, width=self.width, height=self.height, bd=0, highlightthickness=0, cursor="hand2", **kwargs)
+        
+        self.bind("<Button-1>", self._on_click)
+        self.trace_name = self.variable.trace_add("write", lambda *args: self._on_var_write())
+        self.bind("<Destroy>", lambda e: self._cleanup())
+        self.bind("<Configure>", lambda e: self.draw())
+        
+        self.draw()
+
+    def _cleanup(self):
+        try:
+            self.variable.trace_remove("write", self.trace_name)
+        except Exception:
+            pass
+
+    def _on_var_write(self):
+        target = 1.0 if self.variable.get() else 0.0
+        if target != self.current_pos and not self.animating:
+            self._animate_to(target)
+        else:
+            self.draw()
+
+    def _on_click(self, event):
+        val = not self.variable.get()
+        self.variable.set(val)
+        if self.command:
+            self.command()
+
+    def _animate_to(self, target):
+        self.animating = True
+        step = 0.2 if target > self.current_pos else -0.2
+        
+        def do_step():
+            if not self.winfo_exists():
+                return
+            new_pos = self.current_pos + step
+            if (step > 0 and new_pos >= target) or (step < 0 and new_pos <= target):
+                self.current_pos = target
+                self.animating = False
+                self.draw()
+            else:
+                self.current_pos = new_pos
+                self.draw()
+                self.after(15, do_step)
+                
+        do_step()
+
+    def draw(self):
+        self.delete("all")
+        
+        w = self.width
+        h = self.height
+        
+        # Apply parent bg to switch frame container
+        parent_bg = self.master.cget("bg")
+        self.configure(bg=parent_bg)
+        
+        # Switch background track
+        off_bg = COLORS["line"]
+        on_bg = COLORS["gold"]
+        
+        # Linear interpolation between off_bg and on_bg color values for animation smoothness
+        # To keep it simple, we use off_bg or on_bg based on transition midpoint
+        bg_fill = on_bg if self.current_pos > 0.5 else off_bg
+        
+        # Draw pill shaped track
+        r = self.radius
+        points = [
+            r, 0,
+            w - r, 0,
+            w, 0,
+            w, r,
+            w, h - r,
+            w, h,
+            w - r, h,
+            r, h,
+            0, h,
+            0, h - r,
+            0, r,
+            0, 0
+        ]
+        self.create_polygon(points, smooth=True, fill=bg_fill, outline="", width=0)
+        
+        # Draw sliding toggle white handle circle
+        margin = 2
+        handle_d = h - 2 * margin
+        handle_r = handle_d / 2
+        
+        start_x = margin + handle_r
+        end_x = w - margin - handle_r
+        hx = start_x + self.current_pos * (end_x - start_x)
+        hy = h / 2
+        
+        # Subtle shadow for handle button
+        shadow_color = COLORS["shadow"]
+        if shadow_color.lower() != "#ffffff":
+            self.create_oval(hx - handle_r, hy - handle_r + 1, hx + handle_r, hy + handle_r + 1, fill=shadow_color, outline="", width=0)
+            
+        self.create_oval(hx - handle_r, hy - handle_r, hx + handle_r, hy + handle_r, fill="#ffffff", outline="", width=0)
+
+
 if __name__ == "__main__":
     StudyCityApp().run()
+
