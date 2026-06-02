@@ -16,10 +16,9 @@ const darkIcon = document.getElementById("theme-toggle-dark-icon");
 const lightIcon = document.getElementById("theme-toggle-light-icon");
 
 if (themeToggleBtn && darkIcon && lightIcon) {
-  // Check local storage or system preference
+  // Check local storage, defaults to dark theme on first visit
   const storedTheme = localStorage.getItem("theme");
-  const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const initialTheme = storedTheme || (systemPrefersDark ? "dark" : "light");
+  const initialTheme = storedTheme || "dark";
 
   // Set initial theme state
   document.documentElement.setAttribute("data-theme", initialTheme);
