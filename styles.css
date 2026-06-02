@@ -499,6 +499,7 @@ html[data-theme="dark"] .nav-item:hover {
   height: 100%;
   display: flex;
   flex-direction: column;
+  padding-bottom: 20px; /* Prevents bottom elements from touching the edge when scrolled */
 }
 .mockup-tab-content h3 {
   font-size: 1.15rem;
@@ -1263,6 +1264,18 @@ html[data-theme="dark"] .nav-item:hover {
   .steps {
     gap: 20px;
   }
+  /* Disable 3D transforms on tablet and mobile viewports to prevent edge clipping */
+  .hero-mockup-wrapper {
+    perspective: none;
+  }
+  .app-mockup {
+    transform: none !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+  .app-mockup:hover {
+    transform: none !important;
+    box-shadow: var(--shadow-md) !important;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1352,6 +1365,14 @@ html[data-theme="dark"] .nav-item:hover {
   }
   .mockup-sidebar {
     flex-wrap: wrap;
+    justify-content: center;
+  }
+  .nav-item span {
+    display: none; /* Hide navigation texts on small screens */
+  }
+  .nav-item {
+    gap: 0;
+    padding: 8px;
     justify-content: center;
   }
   .timer-controls-row {
