@@ -1110,86 +1110,147 @@ class StudyCityApp:
         self.goal_entry.bind("<FocusOut>", lambda _event: self._save_current_session())
         self.goal_entry.bind("<Return>", lambda _event: self._save_current_session())
 
-        params_row = tk.Frame(container, bg=COLORS["cream"])
-        params_row.pack(fill="x", pady=5)
-        params_row.columnconfigure((0, 1, 2), weight=1)
+        # Beautiful vertical stack of sliders with clean labels and live HSL-harmony styles
+        sliders_container = tk.Frame(container, bg=COLORS["cream"])
+        sliders_container.pack(fill="x", pady=(5, 10))
 
-        # Duration Spinbox
-        t_frame = tk.Frame(params_row, bg=COLORS["cream"])
-        t_frame.grid(row=0, column=0, sticky="ew", padx=4)
-        tk.Label(t_frame, text="Dauer (Min)", font=("Segoe UI", 8, "bold"), fg=COLORS["muted"], bg=COLORS["cream"]).pack(anchor="w", pady=(0, 4))
-        
-        t_spin_bg = RoundedPanel(t_frame, bg=COLORS["cream"], fill=COLORS["cream"], radius=6, height=30)
-        t_spin_bg.pack(fill="x")
-        self.target_spin = tk.Spinbox(
-            t_spin_bg.inner,
+        # 1. Slider: Duration (Dauer)
+        dur_row = tk.Frame(sliders_container, bg=COLORS["cream"])
+        dur_row.pack(fill="x", pady=6)
+
+        dur_hdr = tk.Frame(dur_row, bg=COLORS["cream"])
+        dur_hdr.pack(fill="x")
+
+        dur_lbl = tk.Label(
+            dur_hdr,
+            text="Fokus-Dauer",
+            font=("Segoe UI", 9, "bold"),
+            fg=COLORS["muted"],
+            bg=COLORS["cream"]
+        )
+        dur_lbl.pack(side="left")
+
+        self.dur_value_lbl = tk.Label(
+            dur_hdr,
+            text=f"{self.target_minutes.get()} Min",
+            font=("Segoe UI", 10, "bold"),
+            fg=COLORS["gold"],
+            bg=COLORS["cream"]
+        )
+        self.dur_value_lbl.pack(side="right")
+
+        self.dur_scale = tk.Scale(
+            dur_row,
             from_=5,
             to=MAX_SESSION_MINUTES,
-            increment=5,
-            textvariable=self.target_minutes,
+            resolution=5,
+            orient="horizontal",
+            showvalue=False,
+            variable=self.target_minutes,
+            command=self._on_duration_slider_changed,
             bg=COLORS["cream"],
-            fg=COLORS["ink"],
+            troughcolor=COLORS["paper_dark"],
+            activebackground=COLORS["gold"],
+            highlightthickness=0,
             bd=0,
-            relief="flat",
-            width=6,
-            command=self._target_changed,
-            justify="center",
-            font=("Segoe UI", 9)
+            width=8,
+            sliderlength=16,
+            sliderrelief="flat",
+            cursor="hand2"
         )
-        self.target_spin.pack(fill="both", expand=True, padx=8, pady=3)
-        self.target_spin.bind("<FocusOut>", lambda _event: self._target_changed())
-        self.target_spin.bind("<Return>", lambda _event: self._target_changed())
+        self.dur_scale.pack(fill="x", pady=(4, 0))
 
-        # Popup Spinbox
-        r_frame = tk.Frame(params_row, bg=COLORS["cream"])
-        r_frame.grid(row=0, column=1, sticky="ew", padx=4)
-        tk.Label(r_frame, text="Popup (Min)", font=("Segoe UI", 8, "bold"), fg=COLORS["muted"], bg=COLORS["cream"]).pack(anchor="w", pady=(0, 4))
-        
-        r_spin_bg = RoundedPanel(r_frame, bg=COLORS["cream"], fill=COLORS["cream"], radius=6, height=30)
-        r_spin_bg.pack(fill="x")
-        self.reminder_spin = tk.Spinbox(
-            r_spin_bg.inner,
+        # 2. Slider: Popup Reminder (Popup)
+        pop_row = tk.Frame(sliders_container, bg=COLORS["cream"])
+        pop_row.pack(fill="x", pady=6)
+
+        pop_hdr = tk.Frame(pop_row, bg=COLORS["cream"])
+        pop_hdr.pack(fill="x")
+
+        pop_lbl = tk.Label(
+            pop_hdr,
+            text="Erinnerungs-Intervall (Popup)",
+            font=("Segoe UI", 9, "bold"),
+            fg=COLORS["muted"],
+            bg=COLORS["cream"]
+        )
+        pop_lbl.pack(side="left")
+
+        self.pop_value_lbl = tk.Label(
+            pop_hdr,
+            text=f"{self.reminder_minutes.get()} Min",
+            font=("Segoe UI", 10, "bold"),
+            fg=COLORS["gold"],
+            bg=COLORS["cream"]
+        )
+        self.pop_value_lbl.pack(side="right")
+
+        self.pop_scale = tk.Scale(
+            pop_row,
             from_=5,
             to=90,
-            increment=5,
-            textvariable=self.reminder_minutes,
+            resolution=5,
+            orient="horizontal",
+            showvalue=False,
+            variable=self.reminder_minutes,
+            command=self._on_popup_slider_changed,
             bg=COLORS["cream"],
-            fg=COLORS["ink"],
+            troughcolor=COLORS["paper_dark"],
+            activebackground=COLORS["gold"],
+            highlightthickness=0,
             bd=0,
-            relief="flat",
-            width=6,
-            command=self.save_preferences,
-            justify="center",
-            font=("Segoe UI", 9)
+            width=8,
+            sliderlength=16,
+            sliderrelief="flat",
+            cursor="hand2"
         )
-        self.reminder_spin.pack(fill="both", expand=True, padx=8, pady=3)
-        self.reminder_spin.bind("<FocusOut>", lambda _event: self.save_preferences())
-        self.reminder_spin.bind("<Return>", lambda _event: self.save_preferences())
+        self.pop_scale.pack(fill="x", pady=(4, 0))
 
-        # Daily Goal Spinbox
-        d_frame = tk.Frame(params_row, bg=COLORS["cream"])
-        d_frame.grid(row=0, column=2, sticky="ew", padx=4)
-        tk.Label(d_frame, text="Tagesziel (Std)", font=("Segoe UI", 8, "bold"), fg=COLORS["muted"], bg=COLORS["cream"]).pack(anchor="w", pady=(0, 4))
-        
-        d_spin_bg = RoundedPanel(d_frame, bg=COLORS["cream"], fill=COLORS["cream"], radius=6, height=30)
-        d_spin_bg.pack(fill="x")
-        self.daily_goal_spin = tk.Spinbox(
-            d_spin_bg.inner,
-            from_=0.5,
-            to=12,
-            increment=0.5,
-            textvariable=self.daily_goal_hours,
-            bg=COLORS["cream"],
-            fg=COLORS["ink"],
-            bd=0,
-            relief="flat",
-            width=6,
-            command=self.save_preferences,
-            justify="center",
-            font=("Segoe UI", 9)
+        # 3. Slider: Daily Goal (Tagesziel)
+        goal_row = tk.Frame(sliders_container, bg=COLORS["cream"])
+        goal_row.pack(fill="x", pady=6)
+
+        goal_hdr = tk.Frame(goal_row, bg=COLORS["cream"])
+        goal_hdr.pack(fill="x")
+
+        goal_lbl = tk.Label(
+            goal_hdr,
+            text="Tägliches Lernziel",
+            font=("Segoe UI", 9, "bold"),
+            fg=COLORS["muted"],
+            bg=COLORS["cream"]
         )
-        self.daily_goal_spin.pack(fill="both", expand=True, padx=8, pady=3)
-        self.daily_goal_spin.bind("<FocusOut>", lambda _event: self.save_preferences())
+        goal_lbl.pack(side="left")
+
+        self.goal_value_lbl = tk.Label(
+            goal_hdr,
+            text=f"{self.daily_goal_hours.get():.1f} Std",
+            font=("Segoe UI", 10, "bold"),
+            fg=COLORS["gold"],
+            bg=COLORS["cream"]
+        )
+        self.goal_value_lbl.pack(side="right")
+
+        self.goal_scale = tk.Scale(
+            goal_row,
+            from_=0.5,
+            to=12.0,
+            resolution=0.5,
+            orient="horizontal",
+            showvalue=False,
+            variable=self.daily_goal_hours,
+            command=self._on_goal_slider_changed,
+            bg=COLORS["cream"],
+            troughcolor=COLORS["paper_dark"],
+            activebackground=COLORS["gold"],
+            highlightthickness=0,
+            bd=0,
+            width=8,
+            sliderlength=16,
+            sliderrelief="flat",
+            cursor="hand2"
+        )
+        self.goal_scale.pack(fill="x", pady=(4, 0))
 
         self.chk_box = RoundedPanel(container, bg=COLORS["cream"], fill=COLORS["paper_dark"], radius=8)
         self.chk_box.pack(fill="x", pady=12)
@@ -1264,6 +1325,18 @@ class StudyCityApp:
 
     def _on_checklist_changed(self) -> None:
         pass
+
+    def _on_duration_slider_changed(self, value) -> None:
+        self.dur_value_lbl.configure(text=f"{int(float(value))} Min")
+        self._target_changed()
+
+    def _on_popup_slider_changed(self, value) -> None:
+        self.pop_value_lbl.configure(text=f"{int(float(value))} Min")
+        self.save_preferences()
+
+    def _on_goal_slider_changed(self, value) -> None:
+        self.goal_value_lbl.configure(text=f"{float(value):.1f} Std")
+        self.save_preferences()
 
     def _build_timer_active_frame(self, parent: tk.Frame) -> None:
         container = tk.Frame(parent, bg=COLORS["cream"])
@@ -4734,6 +4807,24 @@ class StudyCityApp:
                 activebackground=bg,
                 activeforeground=COLORS["ink"],
                 selectcolor=COLORS["cream"]
+            )
+
+        elif w_class == "Scale":
+            curr_bg = widget.cget("bg")
+            if curr_bg == LIGHT_COLORS["paper_dark"] or curr_bg == DARK_COLORS["paper_dark"]:
+                bg = COLORS["paper_dark"]
+            elif curr_bg == LIGHT_COLORS["paper"] or curr_bg == DARK_COLORS["paper"]:
+                bg = COLORS["paper"]
+            elif curr_bg == LIGHT_COLORS["cream"] or curr_bg == DARK_COLORS["cream"]:
+                bg = COLORS["cream"]
+            else:
+                bg = COLORS["cream"]
+            widget.configure(
+                bg=bg,
+                highlightbackground=bg,
+                fg=COLORS["ink"],
+                troughcolor=COLORS["paper_dark"],
+                activebackground=COLORS["gold"]
             )
 
         for child in widget.winfo_children():
