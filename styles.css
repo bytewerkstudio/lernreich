@@ -484,13 +484,7 @@ html[data-theme="dark"] .nav-item:hover {
   transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .sidebar-version {
-  font-size: 0.65rem;
-  color: var(--faint);
-  text-align: center;
-  margin-top: 10px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  opacity: 0.8;
+  display: none;
 }
 
 /* Mockup Content Pane */
