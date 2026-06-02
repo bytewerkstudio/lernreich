@@ -4797,6 +4797,9 @@ class StudyCityApp:
             else:
                 bg = COLORS["paper"]
             widget.configure(bg=bg)
+
+        elif w_class == "Toplevel":
+            widget.configure(bg=COLORS["paper"])
             
         elif w_class == "Checkbutton":
             curr_bg = widget.cget("bg")
