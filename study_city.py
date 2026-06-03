@@ -25,7 +25,7 @@ except ImportError:
 APP_NAME = "Lernreich"
 LEGACY_APP_NAMES = ["Avalon", "Lerndorf", "Studiumsstadt"]
 DISPLAY_NAME = "Lernreich"
-APP_VERSION = "1.3"
+APP_VERSION = "1.4"
 APP_COMPANY = "Bytewerk Studio"
 APP_PUBLISHER = "Hijrat Haqmal"
 APP_USER_MODEL_ID = "Lernreich.FocusTimer"

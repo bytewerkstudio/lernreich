@@ -9,7 +9,7 @@ Add-Type -AssemblyName System.Drawing
 
 $appName = "Lernreich"
 $publisher = "Bytewerk Studio"
-$version = "1.3.0"
+$version = "1.4.0"
 $sourceExe = Join-Path $PSScriptRoot "Lernreich.exe"
 $sourceUninstaller = Join-Path $PSScriptRoot "Uninstall-Lernreich.ps1"
 $sourceLogo = Join-Path $PSScriptRoot "logo.png"
