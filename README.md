@@ -21,6 +21,14 @@ Start-BitsTransfer -Source "https://lernreich.pro/downloads/Lernreich-Setup.exe"
 * **Wiederholungen:** Integrierte Planung von Wiederholungen nach dem Prinzip der Spaced Repetition.
 * **Datenschutz:** 100% Offline-Betrieb. Keine Registrierung, keine Cloud-Anbindung, alle Daten verbleiben lokal.
 
+
+## Versionshistorie
+
+### v1.3.0 (03.06.2026)
+* **Benutzername im Setup:** Festlegen des Benutzernamens direkt während des Installationsassistenten.
+* **Kreisförmige Checkboxen:** iOS-Schalter in der Fokus-Vorbereitung durch animierte kreisförmige Checkboxen ersetzt.
+* **Layout & Encoding-Korrekturen:** Anzeigebehebung der Timer-Sanduhr und Beseitigung von Umlaut-Encodingfehlern im Setup.
+
 ## Systemvoraussetzungen
 
 * **Betriebssystem:** Windows 10 / Windows 11 (64-Bit)
