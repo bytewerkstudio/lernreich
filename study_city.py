@@ -118,6 +118,7 @@ TEXT = {
         "save_note": "Notiz merken",
         "last_sessions": "Letzte Sessions",
         "language": "Sprache",
+        "strict_focus": "Ablenkungsschutz",
         "save": "Speichern",
         "close": "Schliessen",
         "reset_warning": "Moechtest du wirklich alle Lernzeiten und Lernreich loeschen?",
@@ -169,6 +170,7 @@ TEXT = {
         "save_note": "Save note",
         "last_sessions": "Recent sessions",
         "language": "Language",
+        "strict_focus": "Distraction Blocker",
         "save": "Save",
         "close": "Close",
         "reset_warning": "Do you really want to delete all learning time and Lernreich?",
@@ -480,6 +482,7 @@ class StudyCityApp:
         )
         theme_mode = str(self.data.get("theme_mode", "light"))
         self.theme_mode = tk.StringVar(value=theme_mode if theme_mode in ("light", "dark") else "light")
+        self.strict_focus_mode = tk.BooleanVar(value=bool(self.data.get("strict_focus_mode", False)))
         today = date.today()
         self.calendar_year = today.year
         self.calendar_month = today.month
@@ -703,6 +706,107 @@ class StudyCityApp:
             font=("Segoe UI", 10),
         ).pack(anchor="w", pady=(7, 0))
         toast.after(6500, toast.destroy)
+
+    def _show_warning_toast(self, title: str, message: str) -> None:
+        if not self.root.winfo_exists():
+            return
+        if hasattr(self, "_active_warning_toast"):
+            try:
+                if self._active_warning_toast.winfo_exists():
+                    self._active_warning_toast.destroy()
+            except Exception:
+                pass
+
+        toast = tk.Toplevel(self.root)
+        self._active_warning_toast = toast
+        toast.is_toast = True
+        toast.overrideredirect(True)
+        toast.attributes("-topmost", True)
+        
+        toast_bg = "#111215"
+        toast.configure(bg=toast_bg)
+
+        width, height = 340, 110
+        screen_w = toast.winfo_screenwidth()
+        screen_h = toast.winfo_screenheight()
+        x = max(12, screen_w - width - 22)
+        y = max(12, screen_h - height - 62)
+        toast.geometry(f"{width}x{height}+{x}+{y}")
+
+        frame = tk.Frame(toast, bg=toast_bg, padx=16, pady=12)
+        frame.pack(fill="both", expand=True)
+        
+        accent_bar = tk.Frame(frame, bg="#e05252", width=4)
+        accent_bar.pack(side="left", fill="y", padx=(0, 12))
+        
+        content = tk.Frame(frame, bg=toast_bg)
+        content.pack(side="left", fill="both", expand=True)
+        
+        tk.Label(
+            content,
+            text=title,
+            bg=toast_bg,
+            fg="#e05252",
+            font=("Segoe UI", 12, "bold"),
+        ).pack(anchor="w")
+        
+        tk.Label(
+            content,
+            text=message,
+            bg=toast_bg,
+            fg="#ffffff",
+            font=("Segoe UI", 9.5),
+            wraplength=280,
+            justify="left"
+        ).pack(anchor="w", pady=(6, 0))
+        
+        toast.after(4500, toast.destroy)
+
+    def _check_distraction(self) -> None:
+        if not self.running or not self.strict_focus_mode.get():
+            return
+            
+        active_hwnd = ctypes.windll.user32.GetForegroundWindow()
+        if not active_hwnd:
+            return
+            
+        length = ctypes.windll.user32.GetWindowTextLengthW(active_hwnd)
+        if length == 0:
+            return
+        buf = ctypes.create_unicode_buffer(length + 1)
+        ctypes.windll.user32.GetWindowTextW(active_hwnd, buf, length + 1)
+        title = buf.value
+        title_lower = title.lower()
+        
+        if "lernreich" in title_lower:
+            return
+            
+        blocklist = self.data.get("blocklist", [
+            "youtube", "netflix", "reddit", "facebook", "twitter", "instagram",
+            "tiktok", "twitch", "discord", "steam", "whatsapp", "telegram",
+            "spotify", "epic games", "origin", "battle.net", "riot client"
+        ])
+        
+        matched_keyword = None
+        for item in blocklist:
+            if item.strip().lower() in title_lower:
+                matched_keyword = item
+                break
+                
+        if matched_keyword is not None:
+            # Minimize the window
+            ctypes.windll.user32.ShowWindow(active_hwnd, 6) # SW_MINIMIZE
+            
+            # Bring Lernreich to the front
+            self.root.deiconify()
+            self.root.lift()
+            self.root.focus_force()
+            
+            # Show a beautiful warning toast
+            self._show_warning_toast(
+                "Fokus-Schutz aktiv",
+                f"Ablenkende App/Webseite erkannt: '{title}'\r\nBitte konzentriere dich auf dein Ziel."
+            )
 
     def _build_styles(self) -> None:
         style = ttk.Style()
@@ -2342,7 +2446,7 @@ class StudyCityApp:
 
         x = self.root.winfo_rootx() + max(120, self.root.winfo_width() // 2 - 180)
         y = self.root.winfo_rooty() + max(90, self.root.winfo_height() // 2 - 130)
-        popup.geometry(f"360x350+{x}+{y}")
+        popup.geometry(f"360x420+{x}+{y}")
 
         frame = tk.Frame(popup, bg=COLORS["cream"], padx=22, pady=20)
         frame.pack(fill="both", expand=True, padx=10, pady=10)
@@ -2411,6 +2515,32 @@ class StudyCityApp:
         theme_combo.grid(row=3, column=1, sticky="ew", pady=(0, 10))
         frame.grid_columnconfigure(1, weight=1)
 
+        # Strict Focus Blocker Setting
+        tk.Label(
+            frame,
+            text=self.t("strict_focus"),
+            bg=COLORS["cream"],
+            fg=COLORS["ink"],
+            font=("Segoe UI", 10),
+        ).grid(row=4, column=0, sticky="w", pady=(0, 10))
+
+        strict_focus_var = tk.BooleanVar(value=self.strict_focus_mode.get())
+        strict_focus_check = tk.Checkbutton(
+            frame,
+            text="Aktivieren" if self.language.get() == "de" else "Enable",
+            variable=strict_focus_var,
+            bg=COLORS["cream"],
+            activebackground=COLORS["cream"],
+            selectcolor=COLORS["cream"] if self.theme_mode.get() == "light" else COLORS["paper_dark"],
+            fg=COLORS["ink"],
+            activeforeground=COLORS["ink"],
+            font=("Segoe UI", 10),
+            bd=0,
+            relief="flat",
+            cursor="hand2"
+        )
+        strict_focus_check.grid(row=4, column=1, sticky="w", pady=(0, 10))
+
         def save_settings() -> None:
             code = LANGUAGE_CODES.get(language_label.get(), "de")
             self.language.set(code)
@@ -2427,6 +2557,9 @@ class StudyCityApp:
             self.theme_mode.set(theme_mode)
             self.data["theme_mode"] = theme_mode
             self._apply_theme()
+
+            self.strict_focus_mode.set(strict_focus_var.get())
+            self.data["strict_focus_mode"] = strict_focus_var.get()
 
             self.data["daily_goal_hours"] = self._daily_goal_hours()
             self.data["active_subject"] = self._current_subject()
@@ -2447,7 +2580,7 @@ class StudyCityApp:
             font=("Segoe UI", 10, "bold"),
             pady=8,
             command=save_settings,
-        ).grid(row=4, column=0, columnspan=2, sticky="ew", pady=(4, 10))
+        ).grid(row=5, column=0, columnspan=2, sticky="ew", pady=(4, 10))
 
         tk.Button(
             frame,
@@ -2462,7 +2595,7 @@ class StudyCityApp:
             font=("Segoe UI", 10),
             pady=8,
             command=lambda: self.export_sessions_csv(parent=popup),
-        ).grid(row=5, column=0, columnspan=2, sticky="ew", pady=(0, 10))
+        ).grid(row=6, column=0, columnspan=2, sticky="ew", pady=(0, 10))
 
         tk.Button(
             frame,
@@ -2476,7 +2609,7 @@ class StudyCityApp:
             font=("Segoe UI", 10),
             pady=8,
             command=lambda: self.reset_all(parent=popup),
-        ).grid(row=6, column=0, columnspan=2, sticky="ew", pady=(0, 10))
+        ).grid(row=7, column=0, columnspan=2, sticky="ew", pady=(0, 10))
 
         tk.Button(
             frame,
@@ -2491,7 +2624,7 @@ class StudyCityApp:
             font=("Segoe UI", 10),
             pady=8,
             command=popup.destroy,
-        ).grid(row=7, column=0, columnspan=2, sticky="ew")
+        ).grid(row=8, column=0, columnspan=2, sticky="ew")
 
         tk.Label(
             frame,
@@ -3343,6 +3476,12 @@ class StudyCityApp:
                 if not target_popup_shown:
                     self._check_reminders()
                 self._auto_save()
+                if not hasattr(self, "_distraction_tick_count"):
+                    self._distraction_tick_count = 0
+                self._distraction_tick_count += 1
+                if self._distraction_tick_count >= 4:
+                    self._distraction_tick_count = 0
+                    self._check_distraction()
         else:
             self._last_tick = now
             self._hourglass_phase += 0.03
