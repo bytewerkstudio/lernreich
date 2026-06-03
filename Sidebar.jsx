@@ -75,7 +75,7 @@ function Sidebar({ view, setView, theme, toggleTheme, onSettings }) {
         <button className="icon-btn" title="Farbschema" onClick={toggleTheme}>
           {theme === 'dark' ? <I.sun /> : <I.moon />}
         </button>
-        <span className="ver">v1.3</span>
+        <span className="ver">v1.4</span>
       </div>
     </aside>
   );
