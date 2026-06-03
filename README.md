@@ -24,6 +24,9 @@ Start-BitsTransfer -Source "https://lernreich.pro/downloads/Lernreich-Setup.exe"
 
 ## Versionshistorie
 
+### v1.4.0 (03.06.2026)
+* **Strikter Ablenkungsschutz:** Automatische Minimierung ablenkender Anwendungen und Webseiten (wie Social Media, YouTube, Netflix, Discord, Steam) während aktiver Fokus-Sessions inklusive Benachrichtigungen.
+
 ### v1.3.0 (03.06.2026)
 * **Benutzername im Setup:** Festlegen des Benutzernamens direkt während des Installationsassistenten.
 * **Kreisförmige Checkboxen:** iOS-Schalter in der Fokus-Vorbereitung durch animierte kreisförmige Checkboxen ersetzt.
