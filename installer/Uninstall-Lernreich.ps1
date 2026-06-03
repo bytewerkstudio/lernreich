@@ -35,7 +35,7 @@ try {
 $Text = @{
   de = @{
     Title = "Lernreich deinstallieren"
-    DataQuestion = "Möchtest du auch Lernfortschritt, Statistikdaten und gespeicherte Lernreich-Daten entfernen?`r`n`r`nBetroffene Ordner:`r`n{0}`r`n`r`nJa = alles löschen`r`nNein = persönliche Lerndaten behalten"
+    DataQuestion = "M$([char]246)chtest du auch Lernfortschritt, Statistikdaten und gespeicherte Lernreich-Daten entfernen?`r`n`r`nBetroffene Ordner:`r`n{0}`r`n`r`nJa = alles l$([char]246)schen`r`nNein = pers$([char]246)nliche Lerndaten behalten"
     DoneRemoved = "Lernreich wurde deinstalliert. Lernfortschritt und Statistikdaten wurden entfernt."
     DoneKept = "Lernreich wurde deinstalliert. Lernfortschritt und Statistikdaten bleiben erhalten."
   }

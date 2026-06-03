@@ -19,25 +19,26 @@ $SetupText = @{
   de = @{
     WindowTitle = "Lernreich Setup"
     HeaderTitle = "Lernreich installieren"
-    HeaderSubtitle = "Einmal einrichten, danach bequem aus dem Startmenü oder vom Desktop starten."
+    HeaderSubtitle = "Einmal einrichten, danach bequem aus dem Startmen$([char]252) oder vom Desktop starten."
     Language = "Sprache"
+    Username = "Benutzername"
     Folder = "Installationsordner"
-    FolderHint = "Wenn du einen Hauptordner wählst, wird darin automatisch ein Unterordner 'Lernreich' erstellt."
-    Browse = "Auswählen"
+    FolderHint = "Wenn du einen Hauptordner w$([char]228)hlst, wird darin automatisch ein Unterordner 'Lernreich' erstellt."
+    Browse = "Ausw$([char]228)hlen"
     Options = "Optionen"
-    DesktopShortcut = "Desktop-Verknüpfung erstellen"
-    StartMenuShortcut = "Startmenü-Verknüpfung erstellen"
+    DesktopShortcut = "Desktop-Verkn$([char]252)pfung erstellen"
+    StartMenuShortcut = "Startmen$([char]252)-Verkn$([char]252)pfung erstellen"
     LaunchAfterInstall = "Nach der Installation starten"
     Install = "Installieren"
     Cancel = "Abbrechen"
-    BrowseDialog = "Installationsordner auswählen"
-    InvalidFolder = "Bitte wähle einen gültigen Installationsordner."
+    BrowseDialog = "Installationsordner ausw$([char]228)hlen"
+    InvalidFolder = "Bitte w$([char]228)hle einen g$([char]252)ltigen Installationsordner."
     MissingApp = "Lernreich.exe wurde im Setup-Paket nicht gefunden."
-    ProgressTitle = "Installation läuft"
+    ProgressTitle = "Installation l$([char]228)uft"
     ProgressSubtitle = "Lernreich wird eingerichtet."
     StepPrepare = "Installation wird vorbereitet..."
     StepCopy = "Programmdateien werden kopiert..."
-    StepShortcuts = "Verknüpfungen werden erstellt..."
+    StepShortcuts = "Verkn$([char]252)pfungen werden erstellt..."
     StepRegistry = "Windows-Eintrag wird angelegt..."
     StepFinish = "Installation wird abgeschlossen..."
     ErrorTitle = "Installation fehlgeschlagen"
@@ -48,6 +49,7 @@ $SetupText = @{
     HeaderTitle = "Install Lernreich"
     HeaderSubtitle = "Set it up once, then start it from the Start menu or desktop."
     Language = "Language"
+    Username = "Username"
     Folder = "Installation folder"
     FolderHint = "If you choose a parent folder, a 'Lernreich' subfolder will be created automatically."
     Browse = "Choose"
@@ -186,6 +188,35 @@ function Show-SetupForm {
   $languageCombo.SelectedIndex = 0
   $form.Controls.Add($languageCombo)
 
+  $usernameLabel = New-Object System.Windows.Forms.Label
+  $usernameLabel.Location = New-Object System.Drawing.Point(280, 105)
+  $usernameLabel.Size = New-Object System.Drawing.Size(250, 20)
+  $usernameLabel.Font = Get-UiFont 9 ([System.Drawing.FontStyle]::Bold)
+  $usernameLabel.BackColor = [System.Drawing.Color]::White
+  $usernameLabel.ForeColor = Get-Color "#111215"
+  $form.Controls.Add($usernameLabel)
+
+  $usernameBox = New-Object System.Windows.Forms.TextBox
+  $usernameBox.Location = New-Object System.Drawing.Point(280, 128)
+  $usernameBox.Size = New-Object System.Drawing.Size(250, 24)
+  $usernameBox.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
+  $usernameBox.BackColor = Get-Color "#ffffff"
+  $usernameBox.ForeColor = Get-Color "#111215"
+  
+  $defaultUser = "Hijrat"
+  if ($env:USERNAME) {
+    try {
+      $rawUser = $env:USERNAME.Trim()
+      if ($rawUser) {
+        $defaultUser = (Get-Culture).TextInfo.ToTitleCase($rawUser.ToLower())
+      }
+    } catch {
+      $defaultUser = "Hijrat"
+    }
+  }
+  $usernameBox.Text = $defaultUser
+  $form.Controls.Add($usernameBox)
+
   $folderLabel = New-Object System.Windows.Forms.Label
   $folderLabel.Location = New-Object System.Drawing.Point(30, 172)
   $folderLabel.Size = New-Object System.Drawing.Size(220, 20)
@@ -295,6 +326,7 @@ function Show-SetupForm {
     $titleLabel.Text = $text.HeaderTitle
     $subtitleLabel.Text = $text.HeaderSubtitle
     $languageLabel.Text = $text.Language
+    $usernameLabel.Text = $text.Username
     $folderLabel.Text = $text.Folder
     $folderHintLabel.Text = $text.FolderHint
     $browseButton.Text = $text.Browse
@@ -338,9 +370,15 @@ function Show-SetupForm {
       return
     }
 
+    $finalUsername = $usernameBox.Text.Trim()
+    if ([string]::IsNullOrEmpty($finalUsername)) {
+      $finalUsername = "Hijrat"
+    }
+
     $state.Result = [pscustomobject]@{
       Language = $state.Language
       InstallDir = $installDir
+      Username = $finalUsername
       DesktopShortcut = [bool]$desktopCheck.Checked
       StartMenuShortcut = [bool]$startMenuCheck.Checked
       LaunchAfterInstall = [bool]$launchCheck.Checked
@@ -550,6 +588,32 @@ try {
   New-ItemProperty -Path $registryPath -Name "NoModify" -Value 1 -PropertyType DWord -Force | Out-Null
   New-ItemProperty -Path $registryPath -Name "NoRepair" -Value 1 -PropertyType DWord -Force | Out-Null
   New-ItemProperty -Path $registryPath -Name "InstallLanguage" -Value $options.Language -PropertyType String -Force | Out-Null
+
+  # Write username to progress.json safely (compatible with PowerShell 5.1 PSCustomObjects)
+  $lernreichAppData = Join-Path $env:APPDATA "Lernreich"
+  if (-not (Test-Path -Path $lernreichAppData)) {
+    New-Item -ItemType Directory -Path $lernreichAppData -Force | Out-Null
+  }
+  $progressJsonPath = Join-Path $lernreichAppData "progress.json"
+  $progressData = @{}
+  if (Test-Path -Path $progressJsonPath) {
+    try {
+      $content = Get-Content -LiteralPath $progressJsonPath -Raw -ErrorAction SilentlyContinue
+      if ($content) {
+        $obj = ConvertFrom-Json $content
+        if ($null -ne $obj) {
+          foreach ($prop in $obj.PSObject.Properties) {
+            $progressData[$prop.Name] = $prop.Value
+          }
+        }
+      }
+    } catch {}
+  }
+  $progressData["username"] = $options.Username
+  if (-not $progressData.ContainsKey("total_seconds")) { $progressData["total_seconds"] = 0 }
+  if (-not $progressData.ContainsKey("sessions")) { $progressData["sessions"] = @() }
+
+  $progressData | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $progressJsonPath -Encoding UTF8
 
   Update-SetupProgress $progress 92 $text.StepFinish
   $installInfo = [ordered]@{

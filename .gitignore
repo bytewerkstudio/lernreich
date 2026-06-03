@@ -13,3 +13,13 @@ Desktop.ini
 *.njsproj
 *.sln
 *.swp
+
+# Python build and cache artifacts
+__pycache__/
+build/
+dist/
+*.pyc
+*.pyo
+*.pyd
+error.log
+app-extracted/

@@ -14,11 +14,12 @@ from tkinter import filedialog, messagebox, ttk
 
 try:
     import pystray
-    from PIL import Image, ImageDraw
+    from PIL import Image, ImageDraw, ImageTk
 except ImportError:
     pystray = None
     Image = None
     ImageDraw = None
+    ImageTk = None
 
 
 APP_NAME = "Lernreich"
@@ -26,7 +27,7 @@ LEGACY_APP_NAMES = ["Avalon", "Lerndorf", "Studiumsstadt"]
 DISPLAY_NAME = "Lernreich"
 APP_VERSION = "1.3"
 APP_COMPANY = "Bytewerk Studio"
-APP_PUBLISHER = "Hijratullah Haqmal"
+APP_PUBLISHER = "Hijrat Haqmal"
 APP_USER_MODEL_ID = "Lernreich.FocusTimer"
 DEFAULT_TARGET_MINUTES = 60
 MAX_SESSION_MINUTES = 150
@@ -181,44 +182,46 @@ TEXT = {
 
 
 LIGHT_COLORS = {
-    "ink": "#111215",        # Deep obsidian charcoal
-    "muted": "#5e616c",      # Sleek muted gray
-    "paper": "#fbfbfa",      # Warm, minimalist airy background
-    "paper_dark": "#f1f1ed", # Slightly darker warm-gray
-    "navy": "#111215",        # Matches ink
-    "navy_light": "#1e2025",  # Soft dark gray for hover
-    "gold": "#3b52e2",        # Exquisite brand indigo
-    "gold_dark": "#2a3db6",   # Darker brand color
-    "sage": "#16a34a",
+    "ink": "#18191c",        # Deep obsidian charcoal
+    "muted": "#7c7d84",      # Sleek muted gray
+    "paper": "#f7f7f4",      # Warm, minimalist airy background
+    "paper_dark": "#f1f1ec", # Slightly darker warm-gray
+    "navy": "#4659e6",        # Brand Indigo (Primary Buttons)
+    "navy_light": "#eef0fe",  # Soft brand indigo hover background
+    "gold": "#4659e6",        # Brand Indigo
+    "gold_dark": "#2b39ad",   # Darker brand indigo
+    "sage": "#1f8a5b",        # Sage from React app
     "brick": "#d97706",
-    "clay": "#ea580c",
-    "slate": "#4b5563",
-    "cream": "#ffffff",
-    "line": "#e6e6e2",
-    "success": "#16a34a",
+    "clay": "#c1623a",        # Clay from React app
+    "slate": "#7c7d84",
+    "cream": "#ffffff",       # Surface background
+    "line": "#e9e9e3",        # Border line
+    "success": "#1f8a5b",
     "danger": "#dc2626",
-    "shadow": "#eaeae6",
+    "shadow": "#deded6",      # Stronger border or shadow
 }
 
 DARK_COLORS = {
-    "ink": "#fbfbfa",        # Light text
-    "muted": "#9ca3af",      # Muted gray text
-    "paper": "#090a0c",      # Deep dark obsidian background
-    "paper_dark": "#121317", # Slightly lighter dark gray for sidebar
-    "navy": "#fbfbfa",        # Light text for primary buttons
-    "navy_light": "#e5e7eb",  # Active button bg
-    "gold": "#3b52e2",        # Exquisite brand indigo
-    "gold_dark": "#5c6fff",   # Lighter brand indigo for dark mode contrast
-    "sage": "#22c55e",
+    "ink": "#f3f3f1",        # Light text
+    "muted": "#8b8d95",      # Muted gray text
+    "paper": "#0d0e10",      # Deep dark obsidian background
+    "paper_dark": "#131417", # Slightly lighter dark gray for sidebar
+    "navy": "#4659e6",        # Brand Indigo (Primary Buttons)
+    "navy_light": "#202444",  # Soft brand indigo hover background
+    "gold": "#4659e6",        # Brand Indigo
+    "gold_dark": "#6979f5",   # Lighter brand indigo for dark mode contrast
+    "sage": "#1f8a5b",
     "brick": "#f59e0b",
-    "clay": "#f97316",
-    "slate": "#9ca3af",
-    "cream": "#18191e",       # Dark card color
-    "line": "#262930",        # Dark border line
-    "success": "#22c55e",
+    "clay": "#c1623a",
+    "slate": "#8b8d95",
+    "cream": "#16171b",       # Dark card color / Surface
+    "line": "#26282e",        # Dark border line
+    "success": "#1f8a5b",
     "danger": "#ef4444",
     "shadow": "#050507",
 }
+
+
 
 COLORS = dict(LIGHT_COLORS)
 
@@ -829,9 +832,10 @@ class StudyCityApp:
         self.content_container.grid_rowconfigure(0, weight=1)
 
         # Tab A: Fokus-Timer Pane
-        self.timer_pane = RoundedPanel(self.content_container, bg=COLORS["paper"], fill=COLORS["cream"])
-        self.timer_pane.inner.grid_columnconfigure(0, weight=1)
-        self._build_timer_panel(self.timer_pane.inner)
+        self.timer_pane = tk.Frame(self.content_container, bg=COLORS["paper"])
+        self.timer_pane.grid_columnconfigure(0, weight=1)
+        self.timer_pane.grid_rowconfigure(0, weight=1)
+        self._build_timer_panel(self.timer_pane)
 
         # Tab B/C/D: City Panel Pane (Stadt, Kalender, Journal)
         self.city_pane = RoundedPanel(self.content_container, bg=COLORS["paper"], fill=COLORS["cream"])
@@ -846,36 +850,80 @@ class StudyCityApp:
     def _build_sidebar(self, parent: tk.Frame) -> None:
         parent.grid_columnconfigure(0, weight=1)
 
-        # Profile Area
-        profile = tk.Frame(parent, bg=COLORS["paper_dark"])
-        profile.grid(row=0, column=0, sticky="ew", padx=20, pady=(24, 20))
+        # 1. Brand Header Area
+        brand_frame = tk.Frame(parent, bg=COLORS["paper_dark"])
+        brand_frame.grid(row=0, column=0, sticky="ew", padx=20, pady=(15, 6))
         
-        avatar_lbl = tk.Label(profile, text="🔥", font=("Segoe UI", 22), bg=COLORS["paper_dark"])
-        avatar_lbl.grid(row=0, column=0, rowspan=3, padx=(0, 10))
+        self.brand_image = None
+        logo_path = Path("logo.png")
+        if logo_path.exists() and ImageTk is not None:
+            try:
+                img = Image.open(logo_path).resize((24, 24), Image.Resampling.LANCZOS)
+                self.brand_image = ImageTk.PhotoImage(img)
+                logo_lbl = tk.Label(brand_frame, image=self.brand_image, bg=COLORS["paper_dark"])
+                logo_lbl.pack(side="left", padx=(0, 8))
+            except Exception:
+                pass
         
-        user_lbl = tk.Label(profile, text="Lernzeit-Profi", font=("Segoe UI", 10, "bold"), fg=COLORS["ink"], bg=COLORS["paper_dark"])
+        if not self.brand_image:
+            logo_lbl = tk.Label(brand_frame, text="🧭", font=("Segoe UI", 16), bg=COLORS["paper_dark"])
+            logo_lbl.pack(side="left", padx=(0, 8))
+            
+        brand_info = tk.Frame(brand_frame, bg=COLORS["paper_dark"])
+        brand_info.pack(side="left", fill="both", expand=True)
+        
+        brand_title = tk.Label(brand_info, text="Lernreich", font=("Segoe UI", 12, "bold"), fg=COLORS["ink"], bg=COLORS["paper_dark"])
+        brand_title.pack(anchor="w")
+        brand_sub = tk.Label(brand_info, text="FOCUS TIMER", font=("Segoe UI", 7, "bold"), fg=COLORS["muted"], bg=COLORS["paper_dark"])
+        brand_sub.pack(anchor="w")
+
+        # 2. Profile Area inside a white RoundedPanel
+        self.profile_panel = RoundedPanel(parent, bg=COLORS["paper_dark"], fill=COLORS["cream"], radius=12)
+        self.profile_panel.grid(row=1, column=0, sticky="ew", padx=18, pady=(4, 10))
+        self.profile_panel.inner.configure(padx=10, pady=8)
+        
+        username = self.data.get("username", "Hijrat")
+        initials = username[0].upper() if username else "H"
+        
+        # User circle avatar
+        avatar_canvas = tk.Canvas(self.profile_panel.inner, width=32, height=32, bg=COLORS["cream"], bd=0, highlightthickness=0)
+        avatar_canvas.grid(row=0, column=0, rowspan=2, padx=(0, 10))
+        avatar_canvas.create_oval(2, 2, 30, 30, fill=COLORS["gold"], outline="")
+        avatar_canvas.create_text(16, 16, text=initials, font=("Segoe UI", 11, "bold"), fill="#ffffff")
+        
+        user_lbl = tk.Label(self.profile_panel.inner, text=username, font=("Segoe UI", 10, "bold"), fg=COLORS["ink"], bg=COLORS["cream"])
         user_lbl.grid(row=0, column=1, sticky="w")
         
-        self.sidebar_streak_lbl = tk.Label(profile, text="Streak: 0 Tage", font=("Segoe UI", 8), fg=COLORS["muted"], bg=COLORS["paper_dark"])
+        self.sidebar_streak_lbl = tk.Label(self.profile_panel.inner, text="Streak: 0 Tage", font=("Segoe UI", 8), fg=COLORS["muted"], bg=COLORS["cream"])
         self.sidebar_streak_lbl.grid(row=1, column=1, sticky="w")
 
-        # Visual preview of the streak status (last 7 days)
         self.streak_preview_canvas = tk.Canvas(
-            profile,
-            width=100,
-            height=14,
-            bg=COLORS["paper_dark"],
+            self.profile_panel.inner,
+            width=140,
+            height=10,
+            bg=COLORS["cream"],
             bd=0,
             highlightthickness=0
         )
-        self.streak_preview_canvas.grid(row=2, column=1, sticky="w", pady=(2, 0))
+        self.streak_preview_canvas.grid(row=2, column=0, columnspan=2, sticky="w", pady=(8, 0))
+        self.streak_preview_canvas.bind("<Configure>", lambda e: self._draw_streak_preview())
 
-        # Nav Area
+        # 3. Navigation Header label
+        self.nav_label = tk.Label(
+            parent,
+            text="NAVIGATION",
+            font=("Segoe UI", 7, "bold"),
+            fg=COLORS["muted"],
+            bg=COLORS["paper_dark"],
+            anchor="w"
+        )
+        self.nav_label.grid(row=2, column=0, sticky="ew", padx=22, pady=(6, 2))
+
+        # 4. Nav buttons Frame
         self.nav_frame = tk.Frame(parent, bg=COLORS["paper_dark"])
-        self.nav_frame.grid(row=1, column=0, sticky="new", padx=12)
-        parent.grid_rowconfigure(1, weight=1)
+        self.nav_frame.grid(row=3, column=0, sticky="new", padx=12)
 
-        # Create sidebar buttons with custom styling
+        # Create sidebar buttons with custom styling (height shrunk to 32, pady to 1.5)
         self.nav_buttons = {}
         nav_items = [
             ("timer", "⏱  Fokus-Timer"),
@@ -890,37 +938,46 @@ class StudyCityApp:
                 font=("Segoe UI", 10, "normal"),
                 bg=COLORS["paper_dark"],
                 fg=COLORS["muted"],
-                active_bg="#eef0fe" if self.theme_mode.get() == "light" else "#202444",
-                active_fg="#3b52e2" if self.theme_mode.get() == "light" else "#5c6fff",
+                active_bg=COLORS["navy_light"],
+                active_fg=COLORS["navy"],
                 radius=10,
                 width=206,
-                height=38,
+                height=32,
                 command=lambda v=view_id: self.switch_view(v)
             )
-            btn.pack(fill="x", pady=3)
+            btn.pack(fill="x", pady=1.5)
             self.nav_buttons[view_id] = btn
 
-        # Bottom XP Progress Area
-        self.xp_sidebar_frame = tk.Frame(parent, bg=COLORS["paper_dark"])
-        self.xp_sidebar_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=24)
-        parent.grid_rowconfigure(2, weight=0)
+        # Spacer frame to push level panel and utilities to the bottom
+        spacer = tk.Frame(parent, bg=COLORS["paper_dark"])
+        spacer.grid(row=4, column=0, sticky="nsew")
+        parent.grid_rowconfigure(4, weight=1)
 
-        self.xp_sidebar_frame.grid_columnconfigure(0, weight=1)
-        self.sidebar_lvl_lbl = tk.Label(self.xp_sidebar_frame, text="Level 1", font=("Segoe UI", 8, "bold"), fg=COLORS["ink"], bg=COLORS["paper_dark"])
+        # 5. Bottom XP Progress panel (reduced pady and internal configure)
+        self.xp_sidebar_panel = RoundedPanel(parent, bg=COLORS["paper_dark"], fill=COLORS["cream"], radius=12)
+        self.xp_sidebar_panel.grid(row=5, column=0, sticky="ew", padx=18, pady=(8, 10))
+        self.xp_sidebar_panel.inner.configure(padx=10, pady=8)
+        self.xp_sidebar_panel.inner.grid_columnconfigure(0, weight=1)
+
+        self.sidebar_lvl_lbl = tk.Label(self.xp_sidebar_panel.inner, text="Level 1", font=("Segoe UI", 8, "bold"), fg=COLORS["ink"], bg=COLORS["cream"])
         self.sidebar_lvl_lbl.grid(row=0, column=0, sticky="w")
 
-        self.sidebar_xp_lbl = tk.Label(self.xp_sidebar_frame, text="0 / 100 XP", font=("Segoe UI", 8), fg=COLORS["muted"], bg=COLORS["paper_dark"])
+        self.sidebar_xp_lbl = tk.Label(self.xp_sidebar_panel.inner, text="0 / 100 XP", font=("Segoe UI", 8), fg=COLORS["muted"], bg=COLORS["cream"])
         self.sidebar_xp_lbl.grid(row=0, column=1, sticky="e")
 
-        self.xp_sidebar_canvas = tk.Canvas(self.xp_sidebar_frame, height=8, bg=COLORS["paper_dark"], bd=0, highlightthickness=0)
-        self.xp_sidebar_canvas.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(6, 0))
+        self.xp_sidebar_canvas = tk.Canvas(self.xp_sidebar_panel.inner, height=8, bg=COLORS["cream"], bd=0, highlightthickness=0)
+        self.xp_sidebar_canvas.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(6, 4))
+        self.xp_sidebar_canvas.bind("<Configure>", lambda e: self._draw_sidebar_xp())
+        
+        self.sidebar_xp_needed_lbl = tk.Label(self.xp_sidebar_panel.inner, text="Noch 100 XP bis Level 2", font=("Segoe UI", 8), fg=COLORS["muted"], bg=COLORS["cream"])
+        self.sidebar_xp_needed_lbl.grid(row=2, column=0, columnspan=2, sticky="w", pady=(2, 0))
 
-        # Bottom Utility Bar (Icons for Settings, Dark Mode and Version)
-        utils_frame = tk.Frame(self.xp_sidebar_frame, bg=COLORS["paper_dark"])
-        utils_frame.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(10, 0))
+        # 6. Bottom Utilities (Settings, Dark Mode & Version) outside of panels
+        utils_frame = tk.Frame(parent, bg=COLORS["paper_dark"])
+        utils_frame.grid(row=6, column=0, sticky="ew", padx=20, pady=(0, 15))
         utils_frame.columnconfigure(2, weight=1)
 
-        # 1. Gear/Settings button
+        # Settings
         settings_btn = tk.Button(
             utils_frame,
             text="⚙️",
@@ -930,15 +987,15 @@ class StudyCityApp:
             cursor="hand2",
             bg=COLORS["paper_dark"],
             fg=COLORS["muted"],
-            activebackground="#eef0fe" if self.theme_mode.get() == "light" else "#1e2025",
-            activeforeground="#3b52e2",
+            activebackground=COLORS["navy_light"],
+            activeforeground=COLORS["navy"],
             padx=6,
             pady=4,
             command=self.open_settings
         )
         settings_btn.grid(row=0, column=0, sticky="w", padx=(0, 4))
 
-        # 2. Theme Toggle button
+        # Theme Toggle
         self.theme_toggle_btn = tk.Button(
             utils_frame,
             text="☀️" if self.theme_mode.get() == "dark" else "🌙",
@@ -948,15 +1005,15 @@ class StudyCityApp:
             cursor="hand2",
             bg=COLORS["paper_dark"],
             fg=COLORS["muted"],
-            activebackground="#eef0fe" if self.theme_mode.get() == "light" else "#1e2025",
-            activeforeground="#3b52e2",
+            activebackground=COLORS["navy_light"],
+            activeforeground=COLORS["navy"],
             padx=6,
             pady=4,
             command=self.toggle_theme
         )
-        self.theme_toggle_btn.grid(row=0, column=1, sticky="w", padx=4)
+        self.theme_toggle_btn.grid(row=0, column=1, sticky="w")
 
-        # 3. Version label (pushed to the right)
+        # Version label
         self.sidebar_version_lbl = tk.Label(
             utils_frame,
             text=f"v{APP_VERSION}",
@@ -972,26 +1029,37 @@ class StudyCityApp:
             return
         c.delete("all")
         
-        dot_r = 3.5
-        gap = 4.5
+        # Draw 7 horizontal rounded pill shapes
+        # Total width of canvas is about 140
+        ww = c.winfo_width()
+        w = ww if ww > 1 else 140
+        hh = c.winfo_height()
+        h = hh if hh > 1 else 10
+        
+        pill_w = 14
+        pill_h = 6
+        gap = 4
         start_x = 4
-        y = 7
+        y = h / 2
         
         qualifying = self._qualifying_streak_days(include_active=True)
         today = date.today()
+        
+        # Let's ensure the canvas background matches COLORS["cream"]
+        c.configure(bg=COLORS["cream"])
         
         for i in range(7):
             day = today - timedelta(days=6-i)
             day_str = day.isoformat()
             
-            x = start_x + i * (dot_r * 2 + gap)
+            x = start_x + i * (pill_w + gap)
             is_active = day_str in qualifying
-            color = "#3b52e2" if is_active else "#e6e6e2"
-            outline_color = "#3b52e2" if is_active else "#b0b0a8"
-            
-            c.create_oval(
-                x - dot_r, y - dot_r, x + dot_r, y + dot_r,
-                fill=color, outline=outline_color, width=1
+            color = COLORS["gold"] if is_active else COLORS["line"]
+                
+            # Draw rounded pill shape as a thick line
+            c.create_line(
+                x, y, x + pill_w, y,
+                width=pill_h, capstyle="round", fill=color
             )
 
     def _draw_sidebar_xp(self) -> None:
@@ -1000,31 +1068,37 @@ class StudyCityApp:
             return
         c.delete("all")
         w = max(100, c.winfo_width())
-        h = 8
+        h = int(c.winfo_height() or 8)
         
         total_xp = self.total_visible_xp
         level, current_xp_in_level, cost = self._player_level_info(total_xp)
+        needed = cost - current_xp_in_level
         
-        self.sidebar_lvl_lbl.configure(text=f"Level {level}")
+        self.sidebar_lvl_lbl.configure(text=f"LVL {level}")
         self.sidebar_xp_lbl.configure(text=f"{current_xp_in_level} / {cost} XP")
         
-        c.create_rectangle(0, 0, w, h, fill="#e6e6e2", outline="", width=0)
+        if hasattr(self, "sidebar_xp_needed_lbl"):
+            self.sidebar_xp_needed_lbl.configure(text=f"Noch {needed} XP bis Level {level + 1}")
+            
+        c.configure(bg=COLORS["cream"])
         
+        # Track
+        r = h / 2
+        c.create_line(r, r, w - r, r, width=h, capstyle="round", fill=COLORS["line"])
+        
+        # Fill
         percent = min(1.0, max(0.0, current_xp_in_level / cost))
         fill_w = w * percent
-        if fill_w > 0:
-            c.create_rectangle(0, 0, fill_w, h, fill="#3b52e2", outline="", width=0)
+        if fill_w > r * 2:
+            c.create_line(r, r, fill_w - r, r, width=h, capstyle="round", fill=COLORS["gold"])
 
     def _update_sidebar_nav(self) -> None:
         view = self.current_view.get()
-        is_light = (self.theme_mode.get() == "light")
         for key, btn in self.nav_buttons.items():
             if key == view:
-                active_bg = "#eef0fe" if is_light else "#202444"
-                active_fg = "#3b52e2" if is_light else "#5c6fff"
                 btn.configure_button(
-                    bg=active_bg,
-                    fg=active_fg,
+                    bg=COLORS["navy_light"],
+                    fg=COLORS["navy"],
                     font=("Segoe UI", 10, "bold")
                 )
             else:
@@ -1033,6 +1107,7 @@ class StudyCityApp:
                     fg=COLORS["muted"],
                     font=("Segoe UI", 10, "normal")
                 )
+
 
     def _build_native_menus(self) -> None:
         self.menu_bar = tk.Menu(self.root)
@@ -1072,41 +1147,109 @@ class StudyCityApp:
         self._build_timer_active_frame(self.timer_active_frame)
 
     def _build_timer_setup_frame(self, parent: tk.Frame) -> None:
-        # Wrap everything in a container to enforce professional padding
-        container = tk.Frame(parent, bg=COLORS["cream"])
-        container.pack(fill="both", expand=True, padx=30, pady=(6, 4))
-
+        parent.configure(bg=COLORS["paper"])
+        
+        container = tk.Frame(parent, bg=COLORS["paper"])
+        container.pack(fill="both", expand=True, padx=22, pady=(10, 5))
+        
+        # 1. Header (Title + Subtitle)
         title_lbl = tk.Label(
             container,
-            text="Fokus-Sitzung einrichten",
-            font=("Segoe UI", 16, "bold"),
+            text="Bereit für den nächsten Fokus?",
+            font=("Segoe UI", 14, "bold"),
             fg=COLORS["ink"],
-            bg=COLORS["cream"]
+            bg=COLORS["paper"]
         )
-        title_lbl.pack(anchor="w", pady=(2, 0))
+        title_lbl.pack(anchor="w", pady=(0, 1))
         
         subtitle_lbl = tk.Label(
             container,
-            text="Bereite deinen Kopf vor und schließe alle Ablenkungen aus.",
+            text="Bereite deinen Kopf vor, schließe Ablenkungen und starte deine Session.",
             font=("Segoe UI", 9),
             fg=COLORS["muted"],
-            bg=COLORS["cream"]
+            bg=COLORS["paper"]
         )
         subtitle_lbl.pack(anchor="w", pady=(0, 6))
 
-        input_container = tk.Frame(container, bg=COLORS["cream"])
-        input_container.pack(fill="x", pady=1)
+        # 2. "Heute gelernt" strip card
+        self.today_strip = RoundedPanel(container, bg=COLORS["paper"], fill=COLORS["cream"], radius=12)
+        self.today_strip.pack(fill="x", pady=(0, 6))
+        self.today_strip.inner.configure(padx=12, pady=4)
         
-        tk.Label(
-            input_container,
-            text="Was möchtest du lernen? (Fach)",
-            font=("Segoe UI", 9, "bold"),
+        # Grid inside today_strip: Col 0 (ring), Col 1 (info), Col 2 (streak)
+        self.today_strip.inner.columnconfigure(1, weight=1)
+        
+        self.today_ring_canvas = tk.Canvas(
+            self.today_strip.inner,
+            width=44,
+            height=44,
+            bg=COLORS["cream"],
+            bd=0,
+            highlightthickness=0
+        )
+        self.today_ring_canvas.grid(row=0, column=0, rowspan=2, padx=(0, 10), sticky="w")
+        self.today_ring_canvas.bind("<Configure>", lambda e: self._draw_today_progress_ring())
+        
+        today_title = tk.Label(
+            self.today_strip.inner,
+            text="HEUTE GELERNT",
+            font=("Segoe UI", 8, "bold"),
             fg=COLORS["muted"],
             bg=COLORS["cream"]
-        ).pack(anchor="w", pady=(2, 2))
+        )
+        today_title.grid(row=0, column=1, sticky="w", pady=(1, 0))
         
-        subject_bg = RoundedPanel(input_container, bg=COLORS["cream"], fill=COLORS["cream"], radius=8, height=36)
-        subject_bg.pack(fill="x", pady=(0, 4))
+        self.today_value_lbl = tk.Label(
+            self.today_strip.inner,
+            text="0 min / 2.0 h Tagesziel",
+            font=("Segoe UI", 10, "bold"),
+            fg=COLORS["ink"],
+            bg=COLORS["cream"]
+        )
+        self.today_value_lbl.grid(row=1, column=1, sticky="w", pady=(0, 1))
+        
+        streak_hdr = tk.Label(
+            self.today_strip.inner,
+            text="SERIE",
+            font=("Segoe UI", 8, "bold"),
+            fg=COLORS["muted"],
+            bg=COLORS["cream"]
+        )
+        streak_hdr.grid(row=0, column=2, sticky="e", pady=(1, 0))
+        
+        self.today_streak_val_lbl = tk.Label(
+            self.today_strip.inner,
+            text="🔥 0",
+            font=("Segoe UI", 11, "bold"),
+            fg=COLORS["gold"],
+            bg=COLORS["cream"]
+        )
+        self.today_streak_val_lbl.grid(row=1, column=2, sticky="e", pady=(0, 1))
+
+        # 3. Main Setup Card Panel
+        setup_panel = RoundedPanel(container, bg=COLORS["paper"], fill=COLORS["cream"], radius=16)
+        setup_panel.pack(fill="both", expand=True, pady=(0, 4))
+        setup_panel.inner.configure(padx=16, pady=8)
+        
+        # Subject & Goal Fields Side-by-Side (2 Columns grid)
+        fields_frame = tk.Frame(setup_panel.inner, bg=COLORS["cream"])
+        fields_frame.pack(fill="x", pady=(0, 6))
+        fields_frame.columnconfigure((0, 1), weight=1)
+        
+        # Column 0: Subject
+        subj_col = tk.Frame(fields_frame, bg=COLORS["cream"])
+        subj_col.grid(row=0, column=0, sticky="ew", padx=(0, 8))
+        
+        tk.Label(
+            subj_col,
+            text="Fach",
+            font=("Segoe UI", 8, "bold"),
+            fg=COLORS["muted"],
+            bg=COLORS["cream"]
+        ).pack(anchor="w", pady=(0, 2))
+        
+        subject_bg = RoundedPanel(subj_col, bg=COLORS["cream"], fill=COLORS["cream"], radius=8, height=30)
+        subject_bg.pack(fill="x")
         self.subject_entry = tk.Entry(
             subject_bg.inner,
             textvariable=self.subject_text,
@@ -1117,20 +1260,24 @@ class StudyCityApp:
             relief="flat",
             insertbackground=COLORS["ink"]
         )
-        self.subject_entry.pack(fill="both", expand=True, padx=10, pady=6)
+        self.subject_entry.pack(fill="both", expand=True, padx=8, pady=4)
         self.subject_entry.bind("<FocusOut>", lambda _event: self._save_current_session())
         self.subject_entry.bind("<Return>", lambda _event: self._save_current_session())
 
+        # Column 1: Goal
+        goal_col = tk.Frame(fields_frame, bg=COLORS["cream"])
+        goal_col.grid(row=0, column=1, sticky="ew", padx=(8, 0))
+        
         tk.Label(
-            input_container,
-            text="Was ist dein konkretes Lernziel? (Ziel)",
-            font=("Segoe UI", 9, "bold"),
+            goal_col,
+            text="Konkretes Lernziel",
+            font=("Segoe UI", 8, "bold"),
             fg=COLORS["muted"],
             bg=COLORS["cream"]
-        ).pack(anchor="w", pady=(2, 2))
+        ).pack(anchor="w", pady=(0, 2))
         
-        goal_bg = RoundedPanel(input_container, bg=COLORS["cream"], fill=COLORS["cream"], radius=8, height=36)
-        goal_bg.pack(fill="x", pady=(0, 4))
+        goal_bg = RoundedPanel(goal_col, bg=COLORS["cream"], fill=COLORS["cream"], radius=8, height=30)
+        goal_bg.pack(fill="x")
         self.goal_entry = tk.Entry(
             goal_bg.inner,
             textvariable=self.goal_text,
@@ -1141,172 +1288,106 @@ class StudyCityApp:
             relief="flat",
             insertbackground=COLORS["ink"]
         )
-        self.goal_entry.pack(fill="both", expand=True, padx=10, pady=6)
+        self.goal_entry.pack(fill="both", expand=True, padx=8, pady=4)
         self.goal_entry.bind("<FocusOut>", lambda _event: self._save_current_session())
         self.goal_entry.bind("<Return>", lambda _event: self._save_current_session())
 
-        # Beautiful vertical stack of sliders with clean labels and live HSL-harmony styles
-        sliders_container = tk.Frame(container, bg=COLORS["cream"])
-        sliders_container.pack(fill="x", pady=(2, 4))
+        # 4. Settings Sliders (Gridded side-by-side in 3 columns)
+        settings_label = tk.Label(
+            setup_panel.inner,
+            text="EINSTELLUNGEN",
+            font=("Segoe UI", 8, "bold"),
+            fg=COLORS["muted"],
+            bg=COLORS["cream"]
+        )
+        settings_label.pack(anchor="w", pady=(2, 2))
 
-        # 1. Slider: Duration (Dauer)
+        sliders_container = tk.Frame(setup_panel.inner, bg=COLORS["cream"])
+        sliders_container.pack(fill="x", pady=(0, 6))
+        sliders_container.columnconfigure((0, 1, 2), weight=1)
+
+        # Slider: Duration (Dauer) - Column 0
         dur_row = tk.Frame(sliders_container, bg=COLORS["cream"])
-        dur_row.pack(fill="x", pady=2)
-
+        dur_row.grid(row=0, column=0, sticky="ew", padx=(0, 6))
         dur_hdr = tk.Frame(dur_row, bg=COLORS["cream"])
         dur_hdr.pack(fill="x")
-
-        dur_lbl = tk.Label(
-            dur_hdr,
-            text="Fokus-Dauer",
-            font=("Segoe UI", 9, "bold"),
-            fg=COLORS["muted"],
-            bg=COLORS["cream"]
-        )
-        dur_lbl.pack(side="left")
-
-        self.dur_value_lbl = tk.Label(
-            dur_hdr,
-            text=f"{self.target_minutes.get()} Min",
-            font=("Segoe UI", 10, "bold"),
-            fg=COLORS["gold"],
-            bg=COLORS["cream"]
-        )
+        tk.Label(dur_hdr, text="Fokus-Dauer", font=("Segoe UI", 8, "bold"), fg=COLORS["muted"], bg=COLORS["cream"]).pack(side="left")
+        self.dur_value_lbl = tk.Label(dur_hdr, text=f"{self.target_minutes.get()} Min", font=("Segoe UI", 8, "bold"), fg=COLORS["gold"], bg=COLORS["cream"])
         self.dur_value_lbl.pack(side="right")
+        self.dur_scale = ModernSlider(dur_row, from_=5, to=MAX_SESSION_MINUTES, resolution=5, variable=self.target_minutes, command=self._on_duration_slider_changed, width=180, height=24)
+        self.dur_scale.pack(fill="x", pady=(1, 0))
 
-        self.dur_scale = ModernSlider(
-            dur_row,
-            from_=5,
-            to=MAX_SESSION_MINUTES,
-            resolution=5,
-            variable=self.target_minutes,
-            command=self._on_duration_slider_changed,
-            width=450,
-            height=32
-        )
-        self.dur_scale.pack(fill="x", pady=(2, 0))
-
-        # 2. Slider: Popup Reminder (Popup)
+        # Slider: Popup Reminder - Column 1
         pop_row = tk.Frame(sliders_container, bg=COLORS["cream"])
-        pop_row.pack(fill="x", pady=2)
-
+        pop_row.grid(row=0, column=1, sticky="ew", padx=6)
         pop_hdr = tk.Frame(pop_row, bg=COLORS["cream"])
         pop_hdr.pack(fill="x")
-
-        pop_lbl = tk.Label(
-            pop_hdr,
-            text="Erinnerungs-Intervall (Popup)",
-            font=("Segoe UI", 9, "bold"),
-            fg=COLORS["muted"],
-            bg=COLORS["cream"]
-        )
-        pop_lbl.pack(side="left")
-
-        self.pop_value_lbl = tk.Label(
-            pop_hdr,
-            text=f"{self.reminder_minutes.get()} Min",
-            font=("Segoe UI", 10, "bold"),
-            fg=COLORS["gold"],
-            bg=COLORS["cream"]
-        )
+        tk.Label(pop_hdr, text="Erinnerung alle", font=("Segoe UI", 8, "bold"), fg=COLORS["muted"], bg=COLORS["cream"]).pack(side="left")
+        self.pop_value_lbl = tk.Label(pop_hdr, text=f"{self.reminder_minutes.get()} Min", font=("Segoe UI", 8, "bold"), fg=COLORS["gold"], bg=COLORS["cream"])
         self.pop_value_lbl.pack(side="right")
+        self.pop_scale = ModernSlider(pop_row, from_=5, to=90, resolution=5, variable=self.reminder_minutes, command=self._on_popup_slider_changed, width=180, height=24)
+        self.pop_scale.pack(fill="x", pady=(1, 0))
 
-        self.pop_scale = ModernSlider(
-            pop_row,
-            from_=5,
-            to=90,
-            resolution=5,
-            variable=self.reminder_minutes,
-            command=self._on_popup_slider_changed,
-            width=450,
-            height=32
-        )
-        self.pop_scale.pack(fill="x", pady=(2, 0))
-
-        # 3. Slider: Daily Goal (Tagesziel)
+        # Slider: Daily Goal - Column 2
         goal_row = tk.Frame(sliders_container, bg=COLORS["cream"])
-        goal_row.pack(fill="x", pady=2)
-
+        goal_row.grid(row=0, column=2, sticky="ew", padx=(6, 0))
         goal_hdr = tk.Frame(goal_row, bg=COLORS["cream"])
         goal_hdr.pack(fill="x")
-
-        goal_lbl = tk.Label(
-            goal_hdr,
-            text="Tägliches Lernziel",
-            font=("Segoe UI", 9, "bold"),
-            fg=COLORS["muted"],
-            bg=COLORS["cream"]
-        )
-        goal_lbl.pack(side="left")
-
-        self.goal_value_lbl = tk.Label(
-            goal_hdr,
-            text=f"{self.daily_goal_hours.get():.1f} Std",
-            font=("Segoe UI", 10, "bold"),
-            fg=COLORS["gold"],
-            bg=COLORS["cream"]
-        )
+        tk.Label(goal_hdr, text="Tagesziel", font=("Segoe UI", 8, "bold"), fg=COLORS["muted"], bg=COLORS["cream"]).pack(side="left")
+        self.goal_value_lbl = tk.Label(goal_hdr, text=f"{self.daily_goal_hours.get():.1f} h", font=("Segoe UI", 8, "bold"), fg=COLORS["gold"], bg=COLORS["cream"])
         self.goal_value_lbl.pack(side="right")
+        self.goal_scale = ModernSlider(goal_row, from_=0.5, to=12.0, resolution=0.5, variable=self.daily_goal_hours, command=self._on_goal_slider_changed, width=180, height=24)
+        self.goal_scale.pack(fill="x", pady=(1, 0))
 
-        self.goal_scale = ModernSlider(
-            goal_row,
-            from_=0.5,
-            to=12.0,
-            resolution=0.5,
-            variable=self.daily_goal_hours,
-            command=self._on_goal_slider_changed,
-            width=450,
-            height=32
-        )
-        self.goal_scale.pack(fill="x", pady=(2, 0))
-
-        self.chk_box = RoundedPanel(container, bg=COLORS["cream"], fill=COLORS["paper_dark"], radius=8)
-        self.chk_box.pack(fill="x", pady=4)
-        self.chk_box.inner.configure(padx=16, pady=6)
-        
+        # 5. Fokus-Vorbereitung Checklist
         tk.Label(
-            self.chk_box.inner,
+            setup_panel.inner,
             text="FOKUS-VORBEREITUNG",
             font=("Segoe UI", 8, "bold"),
             fg=COLORS["muted"],
-            bg=COLORS["paper_dark"]
-        ).pack(anchor="w", pady=(0, 3))
+            bg=COLORS["cream"]
+        ).pack(anchor="w", pady=(2, 2))
+
+        self.chk_box = tk.Frame(setup_panel.inner, bg=COLORS["cream"])
+        self.chk_box.pack(fill="x", pady=(0, 6))
 
         self.checklist_vars = []
-        grid_frame = tk.Frame(self.chk_box.inner, bg=COLORS["paper_dark"])
+        grid_frame = tk.Frame(self.chk_box, bg=COLORS["cream"])
         grid_frame.pack(fill="x", pady=1)
         grid_frame.columnconfigure((0, 1), weight=1)
 
         for idx, item in enumerate(FOCUS_CHECKLIST_ITEMS):
             var = tk.BooleanVar(value=False)
             
-            # Create a small horizontal container for switch + label
-            item_frame = tk.Frame(grid_frame, bg=COLORS["paper_dark"])
+            # Rounded panel chips inside checklist (shrunk height to 30)
+            item_panel = RoundedPanel(grid_frame, bg=COLORS["cream"], fill=COLORS["paper_dark"], radius=8, height=30)
             r_idx = idx // 2
             c_idx = idx % 2
-            item_frame.grid(row=r_idx, column=c_idx, sticky="w", pady=3, padx=6)
+            item_panel.grid(row=r_idx, column=c_idx, sticky="ew", pady=2, padx=4)
+            item_panel.inner.configure(padx=6, pady=2)
             
-            # iOS-style switch
-            switch = IosSwitch(item_frame, variable=var, command=self._on_checklist_changed)
-            switch.pack(side="left", padx=(0, 8))
+            # Use animated CircularCheckbox instead of IosSwitch
+            switch = CircularCheckbox(item_panel.inner, variable=var, command=self._on_checklist_changed, size=20)
+            switch.pack(side="left", padx=(6, 8))
             
-            # Text label
             lbl = tk.Label(
-                item_frame,
+                item_panel.inner,
                 text=item,
-                font=("Segoe UI", 9, "semibold" if self.theme_mode.get() == "light" else "normal"),
+                font=("Segoe UI", 9, "bold" if self.theme_mode.get() == "light" else "normal"),
                 fg=COLORS["ink"],
                 bg=COLORS["paper_dark"],
-                cursor="hand2"
+                cursor="hand2",
+                anchor="w"
             )
-            lbl.pack(side="left")
-            lbl.bind("<Button-1>", lambda e, v=var: v.set(not v.get()))
+            lbl.pack(side="left", fill="y", expand=True)
+            # Clicking the label triggers the checkbox toggle with animation
+            lbl.bind("<Button-1>", lambda e, sw=switch: sw._on_click(e))
             
             self.checklist_vars.append(var)
 
-        # Setup buttons action frame
-        setup_buttons = tk.Frame(container, bg=COLORS["cream"])
-        setup_buttons.pack(fill="x", pady=(8, 2))
+        # 6. Action buttons
+        setup_buttons = tk.Frame(setup_panel.inner, bg=COLORS["cream"])
+        setup_buttons.pack(fill="x", pady=(6, 0))
         setup_buttons.columnconfigure((0, 1), weight=1)
 
         self.start_timer_btn = ModernButton(
@@ -1317,9 +1398,9 @@ class StudyCityApp:
             fg=COLORS["cream"],
             active_bg=COLORS["navy_light"],
             active_fg="#ffffff",
-            radius=12,
-            width=210,
-            height=40,
+            radius=10,
+            width=200,
+            height=34,
             command=self.start_new_session_action
         )
         self.start_timer_btn.grid(row=0, column=0, sticky="ew", padx=(0, 6))
@@ -1332,12 +1413,51 @@ class StudyCityApp:
             fg=COLORS["ink"],
             active_bg=COLORS["line"],
             active_fg=COLORS["ink"],
-            radius=12,
-            width=210,
-            height=40,
+            radius=10,
+            width=200,
+            height=34,
             command=self.resume_session_action
         )
         self.resume_timer_btn.grid(row=0, column=1, sticky="ew", padx=(6, 0))
+
+    def _draw_today_progress_ring(self) -> None:
+        c = self.today_ring_canvas
+        if not c.winfo_exists():
+            return
+        c.delete("all")
+        ww = c.winfo_width()
+        w = ww if ww > 1 else 44
+        hh = c.winfo_height()
+        h = hh if hh > 1 else 44
+        cx = w / 2
+        cy = h / 2
+        
+        # Scale ring properties according to actual canvas size
+        stroke_width = 4 if min(w, h) < 60 else 5
+        r = min(cx, cy) - stroke_width - 2
+        
+        # Track
+        c.configure(bg=COLORS["cream"])
+        c.create_oval(cx - r, cy - r, cx + r, cy + r, outline=COLORS["line"], width=stroke_width)
+        
+        # Fill
+        today_seconds = self._seconds_for_day(date.today())
+        goal_seconds = int(self._daily_goal_hours() * 3600)
+        percent = 0 if goal_seconds <= 0 else min(1.0, today_seconds / goal_seconds)
+        
+        if percent > 0.001:
+            extent_val = -360.0 * percent
+            c.create_arc(cx - r, cy - r, cx + r, cy + r, start=90, extent=extent_val, style="arc", outline=COLORS["gold"], width=stroke_width)
+            
+        # Center percentage text
+        text_size = 8 if min(w, h) < 60 else 9
+        c.create_text(
+            cx, cy,
+            text=f"{int(percent * 100)}%",
+            fill=COLORS["ink"],
+            font=("Segoe UI", text_size, "bold"),
+            anchor="center"
+        )
 
     def _on_checklist_changed(self) -> None:
         pass
@@ -1380,15 +1500,19 @@ class StudyCityApp:
         self.timer_label = ttk.Label(container, text="00:00:00", style="Timer.TLabel", anchor="center")
         self.timer_label.grid(row=2, column=0, pady=(2, 2))
 
+        self._last_hourglass_percent = 0.0
+        self._last_progress_percent = 0.0
+
         self.hourglass_canvas = tk.Canvas(
             container,
-            width=214,
-            height=200,
+            width=250,
+            height=230,
             bg=COLORS["cream"],
             bd=0,
             highlightthickness=0,
         )
         self.hourglass_canvas.grid(row=3, column=0, pady=(2, 2))
+        self.hourglass_canvas.bind("<Configure>", lambda e: self._redraw_hourglass())
 
         self.progress_canvas = tk.Canvas(
             container,
@@ -1398,6 +1522,7 @@ class StudyCityApp:
             highlightthickness=0,
         )
         self.progress_canvas.grid(row=4, column=0, sticky="ew", pady=2)
+        self.progress_canvas.bind("<Configure>", lambda e: self._redraw_progress())
 
         buttons = tk.Frame(container, bg=COLORS["cream"])
         buttons.grid(row=5, column=0, sticky="ew", pady=3)
@@ -3473,6 +3598,17 @@ class StudyCityApp:
         if hasattr(self, "xp_sidebar_canvas"):
             self._draw_sidebar_xp()
 
+        if hasattr(self, "today_value_lbl"):
+            today_secs = self._seconds_for_day(date.today())
+            goal_h = self._daily_goal_hours()
+            self.today_value_lbl.configure(text=f"{minutes_text(today_secs)} / {goal_h:g} h Tagesziel")
+            
+        if hasattr(self, "today_streak_val_lbl"):
+            self.today_streak_val_lbl.configure(text=f"🔥 {current_streak}")
+            
+        if hasattr(self, "today_ring_canvas"):
+            self._draw_today_progress_ring()
+
         target_seconds = self._target_seconds()
         target_percent = min(1.0, self.session_seconds / target_seconds)
         self._draw_progress(target_percent)
@@ -3547,10 +3683,13 @@ class StudyCityApp:
         self._refresh_break_button()
 
     def _draw_progress(self, percent: float) -> None:
+        self._last_progress_percent = percent
         canvas = self.progress_canvas
         canvas.delete("all")
-        width = max(260, canvas.winfo_width())
-        height = max(46, canvas.winfo_height())
+        ww = canvas.winfo_width()
+        width = ww if ww > 1 else 260
+        hh = canvas.winfo_height()
+        height = hh if hh > 1 else 46
         x0, y0 = 4, 15
         x1, y1 = width - 4, 31
         canvas.create_rectangle(x0, y0, x1, y1, fill=COLORS["paper_dark"], outline=COLORS["line"])
@@ -3582,28 +3721,42 @@ class StudyCityApp:
         )
 
     def _draw_hourglass(self, percent: float) -> None:
+        self._last_hourglass_percent = percent
         c = self.hourglass_canvas
         c.delete("all")
-        w = int(c.winfo_width() or 214)
-        h = int(c.winfo_height() or 200)
+        ww = c.winfo_width()
+        w = ww if ww > 1 else 250
+        hh = c.winfo_height()
+        h = hh if hh > 1 else 230
         cx = w / 2
         top_y = 15
         bottom_y = h - 25
         neck_y = h / 2
         
-        # Glossy metallic/glass shades
-        glass_border = "#94a3b8"  # Slate metal
-        glass_shadow = "#e2e8f0"  # Subtle reflection
-        glass_glow = "#f8fafc"    # Light refraction
-        glass_glow_2 = "#f1f5f9"  # Inner light
+        is_dark = (COLORS["paper"] == DARK_COLORS["paper"])
         
-        # Exquisite glowing Indigo/Violet sand palette
-        sand_glow = "#3b52e2"     # Glowing royal Indigo
-        sand_core = "#3144be"     # Deep core shadow
-        sand_sparkle = "#818cf8"  # Sparkling violet highlight
-        sand_glare = "#ffffff"    # Glaring bright sand particle
+        # Decide progress parameters based on state
+        if self.break_running:
+            percent = min(1.0, self.break_seconds / self.break_limit_seconds) if self.break_limit_seconds > 0 else 0.0
+            
+        # Glossy metallic/glass shades adapted to theme
+        glass_border = "#475569" if is_dark else "#94a3b8"
+        glass_shadow = "#1e293b" if is_dark else "#e2e8f0"
+        glass_glow = COLORS["cream"]
+        glass_glow_2 = "#1c1d24" if is_dark else "#f1f5f9"
         
-        wood = "#111215"          # Charcoal plates
+        # Organic Glowing Indigo/Violet sand palette (matches brand)
+        if self.break_running:
+            sand_glow = COLORS["muted"]
+            sand_core = COLORS["slate"]
+            sand_sparkle = "#94a3b8" if is_dark else "#cbd5e1"
+        else:
+            sand_glow = COLORS["navy"]
+            sand_core = COLORS["gold_dark"]
+            sand_sparkle = "#818cf8" if not is_dark else "#a5b4fc"
+            
+        sand_glare = "#ffffff"
+        wood = "#ffffff" if is_dark else "#111215"
         
         top_wide = 48
         neck_half = 6
@@ -3611,26 +3764,32 @@ class StudyCityApp:
         bottom_glass_y = bottom_y - 12
 
         # 1. Soft layered drop shadow
-        c.create_oval(cx - 65, bottom_y + 8, cx + 65, bottom_y + 16, fill="#eaeae6", outline="")
-        c.create_oval(cx - 50, bottom_y + 10, cx + 50, bottom_y + 15, fill="#deded9", outline="")
+        shadow_fill_1 = "#09090b" if is_dark else "#eaeae6"
+        shadow_fill_2 = "#050507" if is_dark else "#deded9"
+        c.create_oval(cx - 65, bottom_y + 8, cx + 65, bottom_y + 16, fill=shadow_fill_1, outline="")
+        c.create_oval(cx - 50, bottom_y + 10, cx + 50, bottom_y + 15, fill=shadow_fill_2, outline="")
 
         # 2. Sleek metal side columns with chrome bases & caps
         for side in (-1, 1):
             x_col = cx + side * 62
             # Chrome column caps
-            c.create_rectangle(x_col - 5, top_y + 8, x_col + 5, top_y + 14, fill="#cbd5e1", outline="#94a3b8")
-            c.create_rectangle(x_col - 5, bottom_y - 14, x_col + 5, bottom_y - 8, fill="#cbd5e1", outline="#94a3b8")
-            # Sleek dark steel cylinders
-            c.create_rectangle(x_col - 3, top_y + 14, x_col + 3, bottom_y - 14, fill="#1e2025", outline="")
-            c.create_rectangle(x_col - 1, top_y + 14, x_col + 1, bottom_y - 14, fill="#475569", outline="")
+            cap_fill = "#334155" if is_dark else "#cbd5e1"
+            cap_outline = "#475569" if is_dark else "#94a3b8"
+            c.create_rectangle(x_col - 5, top_y + 8, x_col + 5, top_y + 14, fill=cap_fill, outline=cap_outline)
+            c.create_rectangle(x_col - 5, bottom_y - 14, x_col + 5, bottom_y - 8, fill=cap_fill, outline=cap_outline)
+            # Sleek columns
+            col_bg = "#0f172a" if is_dark else "#1e2025"
+            col_fg = "#334155" if is_dark else "#475569"
+            c.create_rectangle(x_col - 3, top_y + 14, x_col + 3, bottom_y - 14, fill=col_bg, outline="")
+            c.create_rectangle(x_col - 1, top_y + 14, x_col + 1, bottom_y - 14, fill=col_fg, outline="")
 
-        # 3. Premium Charcoal wooden endplates (rounded 3D bevels)
+        # 3. Wooden endplates (rounded 3D bevels)
         c.create_oval(cx - 68, top_y, cx + 68, top_y + 10, fill=wood, outline="")
         c.create_rectangle(cx - 68, top_y + 5, cx + 68, top_y + 10, fill=wood, outline="")
         c.create_oval(cx - 68, bottom_y - 10, cx + 68, bottom_y, fill=wood, outline="")
         c.create_rectangle(cx - 68, bottom_y - 10, cx + 68, bottom_y - 5, fill=wood, outline="")
 
-        # 4. Premium three-dimensional glass bulbs (glowing polygon refractions)
+        # 4. Premium glass bulbs
         c.create_polygon(
             cx - top_wide, top_glass_y,
             cx + top_wide, top_glass_y,
@@ -3646,7 +3805,7 @@ class StudyCityApp:
             fill=glass_glow_2, outline=""
         )
         
-        # 5. Smooth curved glass bulb outlines
+        # 5. Smooth glass bulb outlines
         c.create_line(
             cx - top_wide, top_glass_y,
             cx - 36, top_glass_y + 25,
@@ -3684,13 +3843,12 @@ class StudyCityApp:
         upper_fill = max(0.0, min(1.0, 1.0 - percent))
         lower_fill = max(0.0, min(1.0, percent))
 
-        # 7. Upper chamber sand (with rippling surface physics)
+        # 7. Upper chamber sand
         upper_chamber_h = neck_y - top_glass_y - 6
         surface_y = neck_y - upper_chamber_h * upper_fill
         surface_half = neck_half + (top_wide - neck_half) * upper_fill
         
         if upper_fill > 0.015:
-            # Active organic surface wave
             slope = 3 * math.sin(self._hourglass_phase * 2.2) if self.running else 0
             c.create_polygon(
                 cx - surface_half, surface_y + slope,
@@ -3699,7 +3857,6 @@ class StudyCityApp:
                 cx - neck_half + 1, neck_y - 4,
                 fill=sand_glow, outline=""
             )
-            # Surface core shadow
             c.create_polygon(
                 cx - surface_half + 4, surface_y + slope + 2,
                 cx + surface_half - 4, surface_y - slope + 2,
@@ -3707,27 +3864,24 @@ class StudyCityApp:
                 cx - neck_half + 1, neck_y - 4,
                 fill=sand_core, outline=""
             )
-            # Glowing ripple highlight line
             c.create_line(
                 cx - surface_half + 2, surface_y + slope,
                 cx + surface_half - 2, surface_y - slope,
                 fill=sand_sparkle, width=2
             )
-            # Sparkling falling grains inside upper chamber
             rng = random.Random(888 + int(percent * 500))
             for _ in range(8):
                 gx = rng.uniform(cx - surface_half * 0.7, cx + surface_half * 0.7)
                 gy = rng.uniform(surface_y + 4, neck_y - 8)
                 c.create_oval(gx - 1, gy - 1, gx + 1, gy + 1, fill=sand_glare, outline="")
 
-        # 8. Lower chamber sand (beautiful organic growing dome)
+        # 8. Lower chamber sand
         pile_base_y = bottom_glass_y - 4
         lower_chamber_h = bottom_glass_y - neck_y - 6
         pile_h = lower_chamber_h * 0.8 * lower_fill
         pile_half = neck_half + (top_wide - neck_half) * lower_fill
         
         if lower_fill > 0.015:
-            # Organic rounded dome
             c.create_oval(
                 cx - pile_half, pile_base_y - pile_h * 0.5 - 4,
                 cx + pile_half, pile_base_y + 4,
@@ -3739,21 +3893,18 @@ class StudyCityApp:
                 cx, pile_base_y - pile_h,
                 fill=sand_glow, outline=""
             )
-            # Dome core shadow
             c.create_polygon(
                 cx - pile_half * 0.7, pile_base_y - 1,
                 cx + pile_half * 0.7, pile_base_y - 1,
                 cx, pile_base_y - pile_h + 3,
                 fill=sand_core, outline=""
             )
-            # Top-glowing highlight arc
             c.create_arc(
                 cx - pile_half, pile_base_y - pile_h * 0.5 - 4,
                 cx + pile_half, pile_base_y + 4,
                 start=0, extent=180,
                 fill=sand_sparkle, outline=""
             )
-            # Sparkle overlay inside the lower dome
             rng = random.Random(777 + int(percent * 500))
             for _ in range(int(3 + lower_fill * 12)):
                 gx = rng.uniform(cx - pile_half * 0.6, cx + pile_half * 0.6)
@@ -3761,15 +3912,13 @@ class StudyCityApp:
                 gy = rng.uniform(max_gy, pile_base_y)
                 c.create_oval(gx - 1, gy - 1, gx + 1, gy + 1, fill=sand_glare, outline="")
 
-        # 9. Ultra cascading falling sand stream (with ripples & particles)
+        # 9. Falling stream
         if self.running and upper_fill > 0.01:
             stream_top = neck_y - 4
             stream_bottom = max(stream_top + 10, pile_base_y - pile_h - 2)
-            # Glowing core line
             c.create_line(cx, stream_top, cx, stream_bottom, fill=sand_glow, width=3)
             c.create_line(cx, stream_top + 4, cx, stream_bottom - 2, fill=sand_sparkle, width=1)
             
-            # Spark particles with realistic gravitational wobble
             span = max(10, stream_bottom - stream_top)
             phase = (self._hourglass_phase * 60) % span
             for i in range(12):
@@ -3780,16 +3929,25 @@ class StudyCityApp:
         elif upper_fill <= 0.01:
             c.create_oval(cx - 2, neck_y - 2, cx + 2, neck_y + 2, fill=sand_sparkle, outline="")
 
+        # 10. Footnote text (Time left till target)
         target_seconds = self._target_seconds()
         remaining_seconds = max(0, target_seconds - int(self.session_seconds))
         footer = "Ziel erreicht" if remaining_seconds <= 0 else f"Bis Ziel: {minutes_text(remaining_seconds)}"
         c.create_text(
             cx,
-            h - 9,
+            h - 10,
             text=footer,
             fill=COLORS["muted"],
             font=("Segoe UI", 9),
         )
+
+    def _redraw_hourglass(self) -> None:
+        if hasattr(self, "_last_hourglass_percent"):
+            self._draw_hourglass(self._last_hourglass_percent)
+
+    def _redraw_progress(self) -> None:
+        if hasattr(self, "_last_progress_percent"):
+            self._draw_progress(self._last_progress_percent)
 
     def _note_entries(self, include_active: bool = True) -> list[dict]:
         entries = []
@@ -5092,6 +5250,10 @@ class StudyCityApp:
             widget.draw()
             return
 
+        if isinstance(widget, CircularCheckbox):
+            widget.draw()
+            return
+
         if isinstance(widget, RoundedPanel):
             bg = COLORS["paper"]
             fill = COLORS["cream"]
@@ -5237,7 +5399,7 @@ class StudyCityApp:
 
 
 class RoundedPanel(tk.Frame):
-    def __init__(self, master, bg: str, fill: str, radius: int = 14, **kwargs) -> None:
+    def __init__(self, master, bg: str, fill: str, radius: int = 18, **kwargs) -> None:
         super().__init__(master, bg=bg, **kwargs)
         self.fill = fill
         self.radius = radius
@@ -5246,6 +5408,7 @@ class RoundedPanel(tk.Frame):
         
         # Use tk.Frame instead of ttk.Frame for direct background color control
         self.inner = tk.Frame(self, bg=fill, bd=0, relief="flat")
+        self.inner.pack(padx=2, pady=2, fill="both", expand=True)
         self.bind("<Configure>", self._draw)
 
     def update_colors(self, bg: str, fill: str) -> None:
@@ -5265,10 +5428,6 @@ class RoundedPanel(tk.Frame):
         
         # Draw the main filled rounded rectangle with line border
         self._rounded_rectangle(1, 1, w - 1, h - 1, r, fill=self.fill, outline=COLORS["line"])
-        
-        # Inset the inner frame slightly so it does not draw over the rounded border
-        inset = 2
-        self.inner.place(x=inset, y=inset, width=w - 2 * inset, height=h - 2 * inset)
 
     def _rounded_rectangle(self, x1, y1, x2, y2, r, **kwargs) -> None:
         points = [
@@ -5313,6 +5472,7 @@ class ModernSlider(tk.Canvas):
         self.bind("<ButtonRelease-1>", self._on_release)
         self.bind("<Enter>", self._on_enter)
         self.bind("<Leave>", self._on_leave)
+        self.bind("<Configure>", lambda e: self.draw_safe())
         
         self.trace_name = self.variable.trace_add("write", lambda *args: self.draw_safe())
         self.bind("<Destroy>", lambda e: self._cleanup())
@@ -5326,12 +5486,16 @@ class ModernSlider(tk.Canvas):
             pass
 
     def _val_to_x(self, val):
-        usable_width = self.width - 2 * self.padding_x
+        ww = self.winfo_width()
+        w = self.width if ww <= 1 else ww
+        usable_width = w - 2 * self.padding_x
         percent = (val - self.from_) / (self.to - self.from_)
         return self.padding_x + percent * usable_width
 
     def _x_to_val(self, x):
-        usable_width = self.width - 2 * self.padding_x
+        ww = self.winfo_width()
+        w = self.width if ww <= 1 else ww
+        usable_width = w - 2 * self.padding_x
         percent = (x - self.padding_x) / usable_width
         percent = min(1.0, max(0.0, percent))
         val = self.from_ + percent * (self.to - self.from_)
@@ -5363,9 +5527,14 @@ class ModernSlider(tk.Canvas):
         bg_color = COLORS["cream"]
         self.configure(bg=bg_color)
         
-        cy = self.height / 2
+        ww = self.winfo_width()
+        hh = self.winfo_height()
+        w = self.width if ww <= 1 else ww
+        h = self.height if hh <= 1 else hh
+        
+        cy = h / 2
         start_x = self.padding_x
-        end_x = self.width - self.padding_x
+        end_x = w - self.padding_x
         
         try:
             val = self.variable.get()
@@ -5447,7 +5616,7 @@ class ModernSlider(tk.Canvas):
 
 
 class ModernButton(tk.Canvas):
-    def __init__(self, master, text, command=None, bg=None, fg=None, active_bg=None, active_fg=None, font=("Segoe UI", 10, "bold"), radius=10, width=180, height=38, **kwargs):
+    def __init__(self, master, text, command=None, bg=None, fg=None, active_bg=None, active_fg=None, font=("Segoe UI", 10, "bold"), radius=13, width=180, height=38, **kwargs):
         self.text = text
         self.command = command
         self.base_bg = bg
@@ -5679,6 +5848,139 @@ class IosSwitch(tk.Canvas):
             self.create_oval(hx - handle_r, hy - handle_r + 1, hx + handle_r, hy + handle_r + 1, fill=shadow_color, outline="", width=0)
             
         self.create_oval(hx - handle_r, hy - handle_r, hx + handle_r, hy + handle_r, fill="#ffffff", outline="", width=0)
+
+
+class CircularCheckbox(tk.Canvas):
+    def __init__(self, master, variable, command=None, size=20, **kwargs):
+        self.variable = variable
+        self.command = command
+        self.size = size
+        
+        self.fill_ratio = 1.0 if self.variable.get() else 0.0
+        self.animating = False
+        
+        super().__init__(
+            master,
+            width=self.size,
+            height=self.size,
+            bd=0,
+            highlightthickness=0,
+            cursor="hand2",
+            **kwargs
+        )
+        
+        self.bind("<Button-1>", self._on_click)
+        self.trace_name = self.variable.trace_add("write", lambda *args: self._on_var_write())
+        self.bind("<Destroy>", lambda e: self._cleanup())
+        self.bind("<Configure>", lambda e: self.draw())
+        
+        self.draw()
+
+    def _cleanup(self):
+        try:
+            self.variable.trace_remove("write", self.trace_name)
+        except Exception:
+            pass
+
+    def _on_var_write(self):
+        target = 1.0 if self.variable.get() else 0.0
+        if target != self.fill_ratio and not self.animating:
+            self._animate_to(target)
+        else:
+            self.draw()
+
+    def _on_click(self, event):
+        val = not self.variable.get()
+        self.variable.set(val)
+        if self.command:
+            self.command()
+
+    def _animate_to(self, target):
+        self.animating = True
+        step = 0.15 if target > self.fill_ratio else -0.15
+        
+        def do_step():
+            if not self.winfo_exists():
+                return
+            new_pos = self.fill_ratio + step
+            if (step > 0 and new_pos >= target) or (step < 0 and new_pos <= target):
+                self.fill_ratio = target
+                self.animating = False
+                self.draw()
+            else:
+                self.fill_ratio = new_pos
+                self.draw()
+                self.after(15, do_step)
+                
+        do_step()
+
+    def draw(self):
+        self.delete("all")
+        
+        # Get background color of parent widget
+        try:
+            parent_bg = self.master.cget("bg")
+        except Exception:
+            try:
+                parent_bg = self.master.cget("background")
+            except Exception:
+                parent_bg = COLORS["cream"]
+        self.configure(bg=parent_bg)
+        
+        cx = self.size / 2
+        cy = self.size / 2
+        r_outer = self.size / 2 - 2
+        
+        # Draw outer circular outline
+        is_light = (COLORS["paper"] == LIGHT_COLORS["paper"])
+        border_color_off = "#cbd5e1" if is_light else "#475569"
+        border_color_on = COLORS["navy"]
+        
+        # Linearly interpolate border color or switch at midpoint
+        border_color = border_color_on if self.fill_ratio > 0.5 else border_color_off
+        
+        # Hollow background
+        self.create_oval(
+            cx - r_outer, cy - r_outer,
+            cx + r_outer, cy + r_outer,
+            outline=border_color,
+            width=2,
+            fill=parent_bg
+        )
+        
+        # Draw filled inner circle representing completion
+        if self.fill_ratio > 0.01:
+            r_fill = r_outer * self.fill_ratio
+            # Outer ring fill
+            self.create_oval(
+                cx - r_fill, cy - r_fill,
+                cx + r_fill, cy + r_fill,
+                outline="",
+                fill=COLORS["navy"]
+            )
+            
+            # Draw white checkmark inside when almost fully filled
+            if self.fill_ratio > 0.7:
+                # Scaled checkmark coordinates based on size
+                p1 = (cx - 3.5, cy - 0.5)
+                p2 = (cx - 1.0, cy + 2.0)
+                p3 = (cx + 4.0, cy - 3.0)
+                
+                # Checkmark lines
+                self.create_line(
+                    p1[0], p1[1], p2[0], p2[1],
+                    fill="#ffffff",
+                    width=2,
+                    capstyle="round",
+                    joinstyle="round"
+                )
+                self.create_line(
+                    p2[0], p2[1], p3[0], p3[1],
+                    fill="#ffffff",
+                    width=2,
+                    capstyle="round",
+                    joinstyle="round"
+                )
 
 
 if __name__ == "__main__":
